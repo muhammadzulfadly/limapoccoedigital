@@ -50,21 +50,21 @@ export default function OTPPage() {
   return (
     <div className="min-h-screen flex">
       {/* KIRI */}
-      <div className="w-1/2 relative">
-        <Image src="/bg-limapoccoe.png" alt="Background Desa" layout="fill" objectFit="cover" className="brightness-75" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center">
-          <Image src="/logo.png" alt="Logo Desa" width={150} height={150} />
-          <h1 className="text-2xl font-bold mt-4">LimapoccoeDigital</h1>
+      <div className="w-1/2 relative hidden lg:flex items-center justify-center">
+        <Image src="/bg-limapoccoe.png" alt="Background" layout="fill" objectFit="cover" className="z-0" />
+        <div className="z-10 text-center text-white">
+          <Image src="/logo.png" alt="Logo" width={200} height={200} className="mx-auto mb-6" />
+          <h1 className="text-3xl font-bold text-white">LimapoccoeDigital</h1>
         </div>
       </div>
 
       {/* KANAN */}
-      <div className="w-1/2 flex items-center justify-center bg-white">
-        <div className="w-full max-w-md px-4">
-          <button onClick={() => router.back()} className="mb-6 text-2xl">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 relative">
+        <div className="w-full max-w-md">
+          <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">
             ←
           </button>
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">Verifikasi OTP</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">VERIFIKASI OTP</h2>
           <p className="text-center text-gray-600 mb-2">
             Masukan kode OTP yang di kirim
             <br />

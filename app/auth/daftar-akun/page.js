@@ -64,12 +64,12 @@ export default function Page() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-4">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 relative">
         <div className="w-full max-w-md">
-          <button onClick={() => router.back()} className="mb-6 text-2xl">
+          <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">
             ←
           </button>
-          <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">DAFTAR AKUN</h1>
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">DAFTAR AKUN</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nama */}
             <div>
