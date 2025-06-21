@@ -44,6 +44,7 @@ export default function Page() {
     e.preventDefault();
     if (validate()) {
       alert("Form valid!");
+      router.push("/auth/verifikasi-otp");
     }
   };
 
@@ -100,7 +101,17 @@ export default function Page() {
             {/* Telepon */}
             <div>
               <label className="text-xs font-semibold text-gray-600">Nomor Telepon</label>
-              <input type="text" name="telepon" value={form.telepon} onChange={handleChange} placeholder="Masukkan nomor telepon Anda" className={`w-full border-b ${errors.telepon ? "border-red-500" : "border-black"} p-2 mt-1 text-sm`} />
+              <input
+                type="text"
+                name="telepon"
+                value={form.telepon}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, ""); // hanya angka
+                  setForm({ ...form, telepon: value });
+                }}
+                placeholder="Masukkan nomor telepon Anda"
+                className={`w-full border-b ${errors.telepon ? "border-red-500" : "border-black"} p-2 mt-1 text-sm`}
+              />
               {errors.telepon && <p className="text-red-500 text-xs mt-1">{errors.telepon}</p>}
             </div>
 
