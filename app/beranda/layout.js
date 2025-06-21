@@ -21,7 +21,7 @@ export default function BerandaLayout({ children }) {
 
         {/* Kanan: Masuk & Daftar */}
         <div className="flex items-center gap-4">
-          <Link href="/auth/masuk-akun" className="text-white text-sm underline hover:text-gray-100">
+          <Link href="/auth/masuk-akun" className="text-white text-sm hover:underline">
             Masuk
           </Link>
           <Link href="/auth/daftar-akun" className="bg-white text-black text-sm font-medium px-4 py-1.5 rounded hover:bg-gray-200">

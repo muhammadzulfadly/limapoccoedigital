@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
 
 export default function Page() {
   const [form, setForm] = useState({
@@ -160,9 +161,9 @@ export default function Page() {
 
             <p className="text-center mt-4 text-sm">
               Sudah punya akun?{" "}
-              <a href="/auth/masuk-akun" className="text-green-600 font-semibold">
+              <Link href="/auth/masuk-akun" className="text-green-600 font-semibold hover:underline">
                 Masuk
-              </a>
+              </Link>
             </p>
           </form>
         </div>
