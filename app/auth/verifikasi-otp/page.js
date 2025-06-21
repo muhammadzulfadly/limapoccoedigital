@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function OTPPage() {
@@ -48,60 +47,46 @@ export default function OTPPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* KIRI */}
-      <div className="w-1/2 relative hidden lg:flex items-center justify-center">
-        <Image src="/bg-limapoccoe.png" alt="Background" layout="fill" objectFit="cover" className="z-0" />
-        <div className="z-10 text-center text-white">
-          <Image src="/logo.png" alt="Logo" width={200} height={200} className="mx-auto mb-6" />
-          <h1 className="text-3xl font-bold text-white">LimapoccoeDigital</h1>
-        </div>
+    <div className="w-full max-w-md">
+      <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">
+        ←
+      </button>
+      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">VERIFIKASI OTP</h2>
+      <p className="text-center text-gray-600 mb-2">
+        Masukan kode OTP yang di kirim
+        <br />
+        ke nomor <span className="font-bold">+6281123123123</span>
+      </p>
+
+      <div className="flex justify-between items-center gap-2 mt-6 mb-2">
+        {otp.map((digit, idx) => (
+          <input
+            key={idx}
+            type="text"
+            maxLength="1"
+            value={digit}
+            onChange={(e) => handleChange(e, idx)}
+            onKeyDown={(e) => handleKeyDown(e, idx)}
+            className={`w-12 h-14 text-center text-2xl border rounded-md focus:outline-none ${error ? "border-red-500 text-red-500" : "border-gray-400"}`}
+          />
+        ))}
       </div>
 
-      {/* KANAN */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 relative">
-        <div className="w-full max-w-md">
-          <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">
-            ←
-          </button>
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">VERIFIKASI OTP</h2>
-          <p className="text-center text-gray-600 mb-2">
-            Masukan kode OTP yang di kirim
-            <br />
-            ke nomor <span className="font-bold">+6281123123123</span>
-          </p>
+      {error && <p className="text-red-500 text-center font-semibold mt-1">Kode OTP Tidak Valid</p>}
 
-          <div className="flex justify-between items-center gap-2 mt-6 mb-2">
-            {otp.map((digit, idx) => (
-              <input
-                key={idx}
-                type="text"
-                maxLength="1"
-                value={digit}
-                onChange={(e) => handleChange(e, idx)}
-                onKeyDown={(e) => handleKeyDown(e, idx)}
-                className={`w-12 h-14 text-center text-2xl border rounded-md focus:outline-none ${error ? "border-red-500 text-red-500" : "border-gray-400"}`}
-              />
-            ))}
-          </div>
+      <div className="text-green-600 text-center mt-4">05:00</div>
 
-          {error && <p className="text-red-500 text-center font-semibold mt-1">Kode OTP Tidak Valid</p>}
+      <p className="text-center text-sm mt-2">
+        Tidak dapat kode OTP?{" "}
+        <a href="#" className="text-sm underline">
+          Kirim ulang kode
+        </a>
+      </p>
 
-          <div className="text-green-600 text-center mt-4">05:00</div>
-
-          <p className="text-center text-sm mt-2">
-            Tidak dapat kode OTP?{" "}
-            <a href="#" className="text-sm underline">
-              Kirim ulang kode
-            </a>
-          </p>
-
-          <div className="flex justify-center mt-6">
-            <button onClick={handleSubmit} className="bg-green-500 text-white px-6 py-2 rounded-md">
-              Verifikasi
-            </button>
-          </div>
-        </div>
+      <div className="flex justify-center mt-6">
+        <button onClick={handleSubmit} className="bg-green-500 text-white px-6 py-2 rounded-md">
+          Verifikasi
+        </button>
       </div>
     </div>
   );
