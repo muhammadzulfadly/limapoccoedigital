@@ -1,5 +1,6 @@
 import React from "react";
 import { FileDown, Search, Plus, Info, Filter, ChevronsLeft, ChevronsRight } from "lucide-react";
+import Link from "next/link";
 
 export async function generateMetadata() {
   return {
@@ -42,10 +43,12 @@ export default async function Page() {
         <div className="bg-white rounded-md shadow-sm p-8 h-screen">
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-6">
-              <button className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-md text-sm">
-                <Plus className="w-5 h-5" strokeWidth={3} />
-                Buat Pengajuan surat
-              </button>
+              <Link href="/masyarakat/pengajuan-surat/sk-tidak-mampu/buat-surat-baru">
+                <button className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition">
+                  <Plus className="w-5 h-5" strokeWidth={3} />
+                  Buat Pengajuan Surat
+                </button>
+              </Link>
               <button className="flex items-center gap-1 px-4 py-2 bg-green-100 text-sm rounded-md text-gray">
                 <Info className="w-4 h-4" />
                 Penjelasan dan Persyaratan

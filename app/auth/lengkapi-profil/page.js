@@ -19,6 +19,8 @@ export default function ProfileForm() {
 
   const validate = () => {
     const newErrors = {};
+    const formatDDMMYYYY = /^\d{2}\/\d{2}\/\d{4}$/;
+    const formatYYYYMMDD = /^\d{4}-\d{2}-\d{2}$/;
 
     if (!formData.alamat || formData.alamat.length < 10) {
       newErrors.alamat = "Alamat tidak boleh kosong dan harus terdiri dari minimal 10 karakter.";
@@ -32,8 +34,8 @@ export default function ProfileForm() {
       newErrors.rtRw = "Format RT/RW tidak valid. Format angka 3 digit, contoh: 005/003.";
     }
 
-    if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.tanggalLahir)) {
-      newErrors.tanggalLahir = "Format tanggal lahir tidak valid. Gunakan format: DD-MM-YYYY.";
+    if (!formatDDMMYYYY.test(formData.tanggalLahir) && !formatYYYYMMDD.test(formData.tanggalLahir)) {
+      newErrors.tanggalLahir = "Format tanggal lahir tidak valid. Gunakan format: DD/MM/YYYY";
     }
 
     if (!/^[A-Za-z\s]+$/.test(formData.tempatLahir)) {
@@ -92,7 +94,7 @@ export default function ProfileForm() {
         <div className="flex gap-4">
           <div className="w-1/2">
             <label className="text-sm">Tanggal Lahir</label>
-            <input name="tanggalLahir" className={`w-full border rounded px-4 py-2 mt-1 ${errors.tanggalLahir ? "border-red-500" : "border-gray-300"}`} placeholder="Tanggal lahir" value={formData.tanggalLahir} onChange={handleChange} />
+            <input type="date" name="tanggalLahir" className={`w-full border rounded px-4 py-2 mt-1 ${errors.tanggalLahir ? "border-red-500" : "border-gray-300"}`} value={formData.tanggalLahir} onChange={handleChange} />
             {errors.tanggalLahir && <p className="text-red-500 text-xs mt-1">{errors.tanggalLahir}</p>}
           </div>
           <div className="w-1/2">
