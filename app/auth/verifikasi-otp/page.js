@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
+
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function OTPPage() {
   const router = useRouter();
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [error, setError] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300); // 5 menit dalam detik
 
   const handleChange = (e, index) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
@@ -46,6 +48,22 @@ export default function OTPPage() {
     }
   };
 
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
   return (
     <div className="w-full max-w-md">
       <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">
@@ -55,7 +73,7 @@ export default function OTPPage() {
       <p className="text-center text-gray-600 mb-2">
         Masukan kode OTP yang di kirim
         <br />
-        ke nomor <span className="font-bold">+6281123123123</span>
+        ke nomor <span className="font-bold">081111111111</span>
       </p>
 
       <div className="flex justify-between items-center gap-2 mt-6 mb-2">
@@ -74,9 +92,9 @@ export default function OTPPage() {
 
       {error && <p className="text-red-500 text-center font-semibold mt-1">Kode OTP Tidak Valid</p>}
 
-      <div className="text-green-600 text-center mt-4">05:00</div>
+      <div className={`text-center mt-4 ${timeLeft > 0 ? "text-green-600" : "text-red-600"}`}>{timeLeft > 0 ? formatTime(timeLeft) : "Kode OTP kadaluarsa. Silahkan kirim ulang kode"}</div>
 
-      <p className="text-center text-sm mt-2">
+      <p className="text-right text-sm mt-2">
         Tidak dapat kode OTP?{" "}
         <a href="#" className="text-sm underline">
           Kirim ulang kode

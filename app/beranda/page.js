@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
 
 const slides = [
   {
@@ -54,14 +55,22 @@ export default function HomePage() {
           {/* Pengajuan Surat */}
           <div className="max-w-xs text-center">
             <Image src="/icons/surat.png" alt="Ikon Surat" width={150} height={150} className="mx-auto" />
-            <button className="mt-6 bg-green-500 text-white px-6 py-2 rounded-full shadow-md font-medium hover:bg-green-600 transition">Pengajuan Surat</button>
+
+            <Link href="/masyarakat/pengajuan-surat">
+              <button className="mt-6 bg-green-500 text-white px-6 py-2 rounded-full shadow-md font-medium hover:bg-green-600 transition">Pengajuan Surat</button>
+            </Link>
+
             <p className="mt-4 text-gray-600 text-sm">Ajukan berbagai jenis surat secara online, mudah dan tanpa antre.</p>
           </div>
 
           {/* Pengaduan */}
           <div className="max-w-xs text-center">
             <Image src="/icons/pengaduan.png" alt="Ikon Pengaduan" width={150} height={150} className="mx-auto" />
-            <button className="mt-6 bg-green-500 text-white px-6 py-2 rounded-full shadow-md font-medium hover:bg-green-600 transition">Pengaduan</button>
+
+            <Link href="/masyarakat/pengaduan-masyarakat">
+              <button className="mt-6 bg-green-500 text-white px-6 py-2 rounded-full shadow-md font-medium hover:bg-green-600 transition">Pengaduan</button>
+            </Link>
+
             <p className="mt-4 text-gray-600 text-sm">Sampaikan keluhan atau aspirasi Anda langsung ke pihak desa, cepat dan praktis.</p>
           </div>
         </div>
