@@ -16,12 +16,12 @@ export default async function Page() {
   const data = await getData()
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-full">
 
       {/* Main Content */}
       <div className="flex-1 bg-gray-100 p-8">
         <header>
-          <h1 className="text-xl font-bold mb-6">Dashboard Pembuatan Surat</h1>
+          <h1 className="text-xl font-bold mb-6">Pengajuan Surat</h1>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
