@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default function Sidebar() {
@@ -54,8 +54,8 @@ export default function Sidebar() {
             <Link href="/masyarakat/pengajuan-surat" className={`font-medium hover:text-green-600 ${isPengajuanSuratActive ? "text-green-500" : "text-black"}`}>
               Pengajuan Surat
             </Link>
-            <button onClick={() => setIsOpen(!isOpen)} className="ml-2 focus:outline-none" aria-label="Toggle submenu">
-              <ChevronDown size={16} className={`transition-transform duration-300 ${isOpen ? "rotate-180 text-green-500" : "text-black"}`} />
+            <button onClick={() => setIsOpen(!isOpen)} className="ml-1 focus:outline-none" aria-label="Toggle submenu">
+              <ChevronRight size={16} className={`transition-transform duration-300 ${isOpen ? "rotate-90 text-green-500" : "text-black"}`} />
             </button>
           </div>
           {isOpen && (

@@ -1,5 +1,5 @@
 import React from "react";
-import { FileDown, Search, Plus, Info, Filter, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { FileDown, Search, Plus, Info, SlidersHorizontal, ChevronsLeft, ChevronsRight } from "lucide-react";
 import Link from "next/link";
 
 export async function generateMetadata() {
@@ -41,7 +41,7 @@ export default async function Page() {
           Pengajuan Surat / <span className="font-bold">SK Kelahiran</span>
         </h1>
         <div className="bg-white rounded-md shadow-sm p-8 h-screen">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-6">
             <div className="flex gap-6">
               <Link href="/masyarakat/pengajuan-surat/sk-kelahiran/buat-surat-baru">
                 <button className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition">
@@ -57,7 +57,7 @@ export default async function Page() {
             <div className="flex items-center border border-gray-500 rounded-md px-4 py-2 bg-white text-gray-500 transition-colors">
               <Search className="w-5 h-5 mr-3" />
               <input type="text" placeholder="Cari" className="outline-none text-sm w-28 bg-white placeholder-gray-500" />
-              <Filter className="w-4 h-4 ml-1" />
+              <SlidersHorizontal className="w-4 h-4 ml-1" />
             </div>
           </div>
 
