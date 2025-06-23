@@ -99,7 +99,7 @@ export default async function Page() {
           </thead>
           <tbody>
             {data.map((item, index) => (
-              <tr key={index} className="text-center">
+              <tr key={index} className="bg-white text-center">
                 <td className="border border-black p-2">{item.tanggal}</td>
                 <td className="border border-black p-2">{item.jenis}</td>
                 <td className={`border border-black p-2 ${statusStyle[item.status]}`}>{item.status}</td>
