@@ -136,21 +136,30 @@ export default async function Page({ params }) {
               </tr>
             </thead>
             <tbody>
-              {data.map((item, idx) => (
-                <tr key={idx} className="bg-white text-center">
-                  <td className="px-4 py-2 border border-black">{item.tanggal}</td>
-                  <td className="px-4 py-2 border border-black">{item.nama}</td>
-                  <td className={`px-4 py-2 border border-black ${statusStyle[item.status]}`}>{item.status}</td>
-                  <td className="px-4 py-2 border border-black">{item.jenis}</td>
-                  <td className="px-4 py-2 border border-black">
-                    <div className="flex justify-center items-center gap-1">
-                      {iconStyle[item.action]}
-                      <span className="text-sm">{item.action}</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+  {data.length === 0 ? (
+    <tr>
+      <td colSpan={5} className="bg-white text-center text-black py-4">
+        Belum ada proses pengajuan surat
+      </td>
+    </tr>
+  ) : (
+    data.map((item, idx) => (
+      <tr key={idx} className="bg-white text-center">
+        <td className="px-4 py-2 border border-black">{item.tanggal}</td>
+        <td className="px-4 py-2 border border-black">{item.nama}</td>
+        <td className={`px-4 py-2 border border-black ${statusStyle[item.status]}`}>{item.status}</td>
+        <td className="px-4 py-2 border border-black">{item.jenis}</td>
+        <td className="px-4 py-2 border border-black">
+          <div className="flex justify-center items-center gap-1">
+            {iconStyle[item.action]}
+            <span className="text-sm">{item.action}</span>
+          </div>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
+
           </table>
         </div>
       </div>

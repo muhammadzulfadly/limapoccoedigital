@@ -19,6 +19,7 @@ export const getSidebarMenu = (role) => {
         { label: "SK Nikah", href: `/${role}/pengajuan-surat/sk-nikah` },
         { label: "SK Penghasilan", href: `/${role}/pengajuan-surat/sk-penghasilan` },
         { label: "Surat Domisili", href: `/${role}/pengajuan-surat/surat-domisili` },
+        { label: "Surat Belum Memiliki Rumah", href: `/${role}/pengajuan-surat/surat-belum-memiliki-rumah` }
       ],
     },
   ];
