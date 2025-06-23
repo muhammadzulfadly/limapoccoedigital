@@ -1,8 +1,8 @@
-import { Ban, Cog, FileText, BadgeCheck, UserCheck, Search, SlidersHorizontal, FileDown } from "lucide-react";
+import { Ban, Cog, FileText, BadgeCheck, UserCheck, Search, SlidersHorizontal, FileDown, Plus } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Dashboard Pengajuan Surat",
+  title: "Pengajuan Surat",
 };
 
 export async function getData() {
@@ -18,11 +18,11 @@ export default async function Page() {
   const data1 = await getData();
 
   const data = [
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Sedang proses", jenis: "SK tidak mampu", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Sedang proses", jenis: "SK tidak mampu", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Butuh Konfirmasi", jenis: "SK Kehilangan", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Ditolak", jenis: "SK Nikah", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Selesai", jenis: "SK Usaha", action: "Unduh" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Sedang proses", jenis: "SK rekomendasi pembelian bbm", action: "Buka" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Sedang proses", jenis: "SK rekomendasi pembelian bbm", action: "Buka" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Butuh Konfirmasi", jenis: "SK rekomendasi pembelian bbm", action: "Buka" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Ditolak", jenis: "SK rekomendasi pembelian bbm", action: "Buka" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Selesai", jenis: "SK rekomendasi pembelian bbm", action: "Unduh" },
   ];
 
   const statusStyle = {
@@ -42,7 +42,7 @@ export default async function Page() {
       {/* Main Content */}
       <div className="flex-1 bg-gray-100 p-8">
         <header>
-          <h1 className="text-xl font-bold mb-6">Dashboard Pengajuan Surat</h1>
+          <h1 className="text-xl font-bold mb-6">Dashboard Pengajuan Surat / SK Rekomendasi Pembelian BBM</h1>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -96,7 +96,15 @@ export default async function Page() {
 
         <div className="border-t border-gray-400 mb-6 mt-6"></div>
 
-        <div className="flex justify-end mb-6">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex gap-6">
+            <Link href="/admin/pengajuan-surat/sk-rekomendasi-pembelian-bbm/buat-surat-baru">
+              <button className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition">
+                <Plus className="w-5 h-5" strokeWidth={3} />
+                Buat Pengajuan Surat
+              </button>
+            </Link>
+          </div>
           <div className="flex items-center border border-gray-500 rounded-md px-4 py-2 bg-white text-gray-500 transition-colors">
             <Search className="w-5 h-5 mr-3" />
             <input type="text" placeholder="Cari" className="outline-none text-sm w-28 bg-white placeholder-gray-500" />
