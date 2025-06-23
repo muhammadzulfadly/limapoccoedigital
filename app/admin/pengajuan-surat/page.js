@@ -124,10 +124,10 @@ export default async function Page() {
                   <td className={`border border-black p-2 ${statusStyle[item.status]}`}>{item.status}</td>
                   <td className="px-4 py-2 border border-black">{item.jenis}</td>
                   <td className="border border-black p-2">
-                    <div className="flex justify-center items-center gap-1">
+                    <Link href={`/pengaduan/${item.id}`} className="flex justify-center items-center gap-1  hover:underline">
                       {iconStyle[item.action]}
-                      <span className="text-sm text-black">{item.action}</span>
-                    </div>
+                      <span className="text-sm">{item.action}</span>
+                    </Link>
                   </td>
                 </tr>
               ))}
