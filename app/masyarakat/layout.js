@@ -1,6 +1,6 @@
 // app/beranda/layout.js
 import "../globals.css";
-import Sidebar from "./sidebar";
+import Sidebar from "@/component/sidebar";
 import Image from "next/image";
 import Link from "next/link";
 import { User } from "lucide-react";
@@ -32,7 +32,7 @@ export default function BerandaLayout({ children }) {
 
       {/* Isi Halaman */}
       <div className="flex pt-16">
-        <Sidebar />
+        <Sidebar role="masyarakat" />
         <main className="flex-1">{children}</main>
       </div>
     </>
