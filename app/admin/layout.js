@@ -3,7 +3,7 @@ import "../globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { User } from "lucide-react";
-import Sidebar from "@/component/sidebar";
+import Sidebar from "./sidebar";
 
 export const metadata = {
   title: "Desa Limmapocoe",
@@ -32,7 +32,7 @@ export default function BerandaLayout({ children }) {
 
       {/* Isi Halaman */}
       <div className="flex pt-16">
-        <Sidebar role="admin" />
+        <Sidebar />
         <main className="flex-1">{children}</main>
       </div>
     </>

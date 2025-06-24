@@ -6,142 +6,144 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 export default function Page() {
+  const router = useRouter();
+
   const [form, setForm] = useState({
-    nama: "",
+    name: "",
     nik: "",
-    telepon: "",
+    no_whatsapp: "",
     password: "",
-    konfirmasi: "",
+    password_confirmation: "",
   });
 
-  const router = useRouter();
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showKonfirmasi, setShowKonfirmasi] = useState(false);
 
   const validate = () => {
     const newErrors = {};
-    if (!/^([a-zA-Z]+\s){1,}[a-zA-Z]+$/.test(form.nama)) {
-      newErrors.nama = "Nama lengkap tidak valid. Harus terdiri dari minimal 2 kata dan hanya huruf.";
+    if (!/^[a-zA-Z\s]{3,}$/.test(form.name)) {
+      newErrors.name = "Nama harus terdiri dari minimal 3 huruf dan hanya huruf/spasi.";
     }
     if (!/^\d{16}$/.test(form.nik)) {
-      newErrors.nik = "NIK tidak valid. Harus terdiri dari 16 digit angka.";
+      newErrors.nik = "NIK harus terdiri dari 16 digit angka.";
     }
-    if (!/^08\d{8,11}$/.test(form.telepon)) {
-      newErrors.telepon = "Nomor telepon tidak valid. Harus dimulai dengan 08 dan 10-13 digit.";
+    if (!/^08\d{8,11}$/.test(form.no_whatsapp)) {
+      newErrors.no_whatsapp = "Nomor telepon tidak valid. Harus dimulai dengan 08 dan 10-13 digit.";
     }
     if (!/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/.test(form.password)) {
-      newErrors.password = "Kata sandi tidak kuat. Minimal 8 karakter dan kombinasi huruf & angka.";
+      newErrors.password = "Kata sandi minimal 8 karakter dan kombinasi huruf & angka.";
     }
-    if (form.password !== form.konfirmasi) {
-      newErrors.konfirmasi = "Kata sandi tidak valid";
+    if (form.password !== form.password_confirmation) {
+      newErrors.password_confirmation = "Konfirmasi password tidak cocok.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validate()) {
-      alert("Form valid!");
-      router.push("/auth/verifikasi-otp");
-    }
-  };
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" }); // bersihkan error saat mengetik
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    try {
+      const res = await fetch("/api/auth/daftar-akun", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const result = await res.json().catch(() => null); // hindari crash
+
+      if (!res.ok) {
+        const message =
+          result?.errors
+            ? Object.values(result.errors)[0][0]
+            : result?.message || "Terjadi kesalahan.";
+        setErrors({ general: message });
+        return;
+      }
+
+      localStorage.setItem("registration_token", result.registration_token);
+      alert(result.message || "Pendaftaran berhasil!");
+      router.push("/auth/verifikasi-otp");
+    } catch (err) {
+      console.error(err);
+      setErrors({ general: "Gagal menghubungi server." });
+    }
   };
 
   return (
     <div className="w-full max-w-md">
-      <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">
-        ←
-      </button>
+      <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">←</button>
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">DAFTAR AKUN</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Nama */}
-        <div>
-          <label className="text-xs font-semibold text-gray-600">Nama Lengkap Sesuai KTP</label>
-          <input type="text" name="nama" value={form.nama} onChange={handleChange} placeholder="Masukkan nama lengkap Anda" className={`w-full border ${errors.nama ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm`} />
-          {errors.nama && <p className="text-red-500 text-xs mt-1">{errors.nama}</p>}
-        </div>
+        <InputField
+          label="Nama Lengkap"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          error={errors.name}
+        />
 
         {/* NIK */}
-        <div>
-          <label className="text-xs font-semibold text-gray-600">NIK</label>
-          <input
-            type="text"
-            name="nik"
-            value={form.nik}
-            onChange={(e) => {
-              const value = e.target.value;
-              // Hanya biarkan angka dan pastikan panjangnya maksimal 16 karakter
-              if (/^\d{0,16}$/.test(value)) {
-                handleChange(e); // Hanya update state jika valid
-              }
-            }}
-            placeholder="Masukkan NIK Anda"
-            className={`w-full border ${errors.nik ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm`}
-          />
-          {errors.nik && <p className="text-red-500 text-xs mt-1">{errors.nik}</p>}
-        </div>
+        <InputField
+          label="NIK"
+          name="nik"
+          value={form.nik}
+          maxLength={16}
+          onChange={(e) => {
+            const value = e.target.value.replace(/\D/g, "");
+            setForm({ ...form, nik: value });
+          }}
+          error={errors.nik}
+        />
 
         {/* Telepon */}
-        <div>
-          <label className="text-xs font-semibold text-gray-600">Nomor Telepon</label>
-          <input
-            type="text"
-            name="telepon"
-            value={form.telepon}
-            onChange={(e) => {
-              const value = e.target.value.replace(/[^0-9]/g, ""); // hanya angka
-              setForm({ ...form, telepon: value });
-            }}
-            placeholder="Masukkan nomor telepon Anda"
-            className={`w-full border-b ${errors.telepon ? "border-red-500" : "border-black"} p-2 mt-1 text-sm`}
-          />
-          {errors.telepon && <p className="text-red-500 text-xs mt-1">{errors.telepon}</p>}
-        </div>
+        <InputField
+          label="Nomor Telepon"
+          name="no_whatsapp"
+          value={form.no_whatsapp}
+          maxLength={13}
+          onChange={(e) => {
+            const value = e.target.value.replace(/\D/g, "");
+            setForm({ ...form, no_whatsapp: value });
+          }}
+          error={errors.no_whatsapp}
+        />
 
         {/* Password */}
-        <div>
-          <label className="text-xs font-semibold text-gray-600">Kata Sandi</label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Masukkan kata sandi unik Anda"
-              className={`w-full border ${errors.password ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm pr-10`}
-            />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-        </div>
+        <PasswordField
+          label="Kata Sandi"
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+          error={errors.password}
+          visible={showPassword}
+          toggle={() => setShowPassword(!showPassword)}
+        />
 
-        {/* Konfirmasi */}
-        <div>
-          <label className="text-xs font-semibold text-gray-600">Konfirmasi Password</label>
-          <div className="relative">
-            <input
-              type={showKonfirmasi ? "text" : "password"}
-              name="konfirmasi"
-              value={form.konfirmasi}
-              onChange={handleChange}
-              placeholder="Masukkan kata sandi unik Anda"
-              className={`w-full border ${errors.konfirmasi ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm pr-10`}
-            />
-            <button type="button" onClick={() => setShowKonfirmasi(!showKonfirmasi)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-              {showKonfirmasi ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-          {errors.konfirmasi && <p className="text-red-500 text-xs mt-1">{errors.konfirmasi}</p>}
-        </div>
+        {/* Konfirmasi Password */}
+        <PasswordField
+          label="Konfirmasi Password"
+          name="password_confirmation"
+          value={form.password_confirmation}
+          onChange={handleChange}
+          error={errors.password_confirmation}
+          visible={showKonfirmasi}
+          toggle={() => setShowKonfirmasi(!showKonfirmasi)}
+        />
 
-        {/* Submit */}
+        {/* General error */}
+        {errors.general && (
+          <p className="text-red-600 text-sm text-center">{errors.general}</p>
+        )}
+
         <button type="submit" className="w-full bg-green-500 text-white py-2 rounded text-sm font-semibold mt-4">
           Daftar
         </button>
@@ -153,6 +155,46 @@ export default function Page() {
           </Link>
         </p>
       </form>
+    </div>
+  );
+}
+
+// Komponen tambahan
+function InputField({ label, name, value, onChange, error, ...props }) {
+  return (
+    <div>
+      <label className="text-xs font-semibold text-gray-600">{label}</label>
+      <input
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={`Masukkan ${label.toLowerCase()}`}
+        className={`w-full border ${error ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm`}
+        {...props}
+      />
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+  );
+}
+
+function PasswordField({ label, name, value, onChange, error, visible, toggle }) {
+  return (
+    <div>
+      <label className="text-xs font-semibold text-gray-600">{label}</label>
+      <div className="relative">
+        <input
+          type={visible ? "text" : "password"}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={`Masukkan ${label.toLowerCase()}`}
+          className={`w-full border ${error ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm pr-10`}
+        />
+        <button type="button" onClick={toggle} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+          {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      </div>
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
 }
