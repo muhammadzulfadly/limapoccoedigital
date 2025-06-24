@@ -96,7 +96,7 @@ export default function Page() {
           <thead>
             <tr className="bg-green-600 text-white">
               <th className="border border-black p-2 w-1/5">Tanggal</th>
-              <th className="border border-black p-2 w-2/5">Jenis Pengaduan</th>
+              <th className="border border-black p-2 w-1/5">Jenis Pengaduan</th>
               <th className="border border-black p-2 w-1/5">Status</th>
               <th className="border border-black p-2 w-1/5">Action</th>
             </tr>

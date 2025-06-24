@@ -5,22 +5,12 @@ export const metadata = {
   title: "Dashboard Pengaduan Masyarakat",
 };
 
-export async function getData() {
-  return {
-    sedangProses: 0,
-    butuhKonfirmasi: 0,
-    ditolak: 1,
-    selesai: 1,
-  };
-}
-
 export default async function Page() {
-  const data1 = await getData();
 
   const data = [
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Menunggu", jenis: "Fasilitas Desa", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Diterima", jenis: "Layanan Masyarakat", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Selesai", jenis: "Fasilitas Desa", action: "Buka" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Menunggu", kategori: "Fasilitas Desa", action: "Buka" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Diterima", kategori: "Layanan Masyarakat", action: "Buka" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Selesai", kategori: "Fasilitas Desa", action: "Buka" },
   ];
 
   const statusStyle = {
@@ -97,7 +87,7 @@ export default async function Page() {
                   <td className="px-4 py-2 border border-black">{item.tanggal}</td>
                   <td className="px-4 py-2 border border-black">{item.nama}</td>
                   <td className={`border border-black p-2 ${statusStyle[item.status]}`}>{item.status}</td>
-                  <td className="px-4 py-2 border border-black">{item.jenis}</td>
+                  <td className="px-4 py-2 border border-black">{item.kategori}</td>
                   <td className="border border-black p-2">
                     <Link href={`/pengaduan/${item.id}`} className="flex justify-center items-center gap-1  hover:underline">
                       {iconStyle[item.action]}

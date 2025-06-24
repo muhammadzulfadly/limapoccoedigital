@@ -104,7 +104,7 @@ export default async function Page({ params }) {
             <thead>
               <tr className="bg-green-700 text-white">
                 <th className="border border-black p-2 w-1/5">Tanggal</th>
-                <th className="border border-black p-2 w-2/5">Jenis surat</th>
+                <th className="border border-black p-2 w-1/5">Jenis surat</th>
                 <th className="border border-black p-2 w-1/5">Status</th>
                 <th className="border border-black p-2 w-1/5">Action</th>
               </tr>
