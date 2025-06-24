@@ -10,6 +10,11 @@ export default function OTPPage() {
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 menit
   const [registrationToken, setRegistrationToken] = useState(null);
+  const [noWhatsapp, setNoWhatsapp] = useState("");
+
+  const blurNumber = (num) => {
+    return num.replace(/^(\d{3})\d+(?=\d{3})/, "$1xxxxxxx");
+  };
 
   const handleChange = (e, index) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
@@ -58,6 +63,7 @@ export default function OTPPage() {
 
       if (res.ok) {
         localStorage.removeItem("registration_token");
+        localStorage.removeItem("no_whatsapp");
         localStorage.setItem("token", result.access_token);
         localStorage.setItem("user", JSON.stringify(result.user));
         alert(result.message || "Verifikasi berhasil!");
@@ -80,6 +86,11 @@ export default function OTPPage() {
       router.push("/auth/daftar-akun");
     } else {
       setRegistrationToken(token);
+    }
+
+    const storedNoWA = localStorage.getItem("no_whatsapp");
+    if (storedNoWA) {
+      setNoWhatsapp(storedNoWA);
     }
   }, [router]);
 
@@ -104,7 +115,8 @@ export default function OTPPage() {
       </button>
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">VERIFIKASI OTP</h2>
       <p className="text-center text-gray-600 mb-2">
-        Masukkan kode OTP yang dikirim ke nomor Anda<br />
+        Masukkan kode OTP yang dikirim ke nomor <br />
+        <span className="font-bold">{noWhatsapp ? blurNumber(noWhatsapp) : "Anda"}</span>
       </p>
 
       <form onSubmit={handleSubmit}>

@@ -9,6 +9,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     nik: "",
@@ -17,11 +18,11 @@ export default function LoginPage() {
 
   const validate = () => {
     const newErrors = {};
-    if (!/^\d{16}$/.test(nik)) {
+    if (!/^\d{16}$/.test(form.nik)) {
       newErrors.nik = "NIK tidak valid. Harus terdiri dari 16 digit angka.";
     }
-    if (password.trim() === "") {
-      newErrors.password = "Katasandi tidak valid";
+    if (form.password.trim() === "") {
+      newErrors.password = "Kata sandi wajib diisi.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -31,20 +32,45 @@ export default function LoginPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
-      alert("Form is valid!");
+    if (!validate()) return;
+
+    setLoading(true);
+    setErrors({});
+
+    try {
+      const res = await fetch("/api/auth/masuk-akun", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem("token", result.access_token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+        alert(result.message || "Login berhasil");
+        router.push("/masyarakat/pengajuan-surat");
+      } else {
+        setErrors({ general: result.message || "Login gagal. Cek kembali NIK dan kata sandi Anda." });
+      }
+    } catch (err) {
+      console.error(err);
+      setErrors({ general: "Gagal menghubungi server." });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="w-full max-w-md">
-      <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">
-        ←
-      </button>
+      <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">←</button>
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">MASUK</h2>
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* NIK */}
         <div>
           <label className="text-xs font-semibold text-gray-600">NIK</label>
@@ -54,10 +80,7 @@ export default function LoginPage() {
             value={form.nik}
             onChange={(e) => {
               const value = e.target.value;
-              // Hanya biarkan angka dan pastikan panjangnya maksimal 16 karakter
-              if (/^\d{0,16}$/.test(value)) {
-                handleChange(e); // Hanya update state jika valid
-              }
+              if (/^\d{0,16}$/.test(value)) handleChange(e);
             }}
             placeholder="Masukkan NIK Anda"
             className={`w-full border ${errors.nik ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm`}
@@ -84,6 +107,9 @@ export default function LoginPage() {
           {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
         </div>
 
+        {/* General Error */}
+        {errors.general && <p className="text-red-600 text-sm text-center">{errors.general}</p>}
+
         {/* Lupa password */}
         <div className="text-center text-sm">
           Lupa{" "}
@@ -93,8 +119,8 @@ export default function LoginPage() {
         </div>
 
         {/* Submit button */}
-        <button type="submit" className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700">
-          Masuk
+        <button type="submit" disabled={loading} className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:opacity-50">
+          {loading ? "Memproses..." : "Masuk"}
         </button>
       </form>
 

@@ -75,6 +75,8 @@ export default function Page() {
       }
 
       localStorage.setItem("registration_token", result.registration_token);
+      localStorage.setItem("no_whatsapp", form.no_whatsapp);
+
       alert(result.message || "Pendaftaran berhasil!");
       router.push("/auth/verifikasi-otp");
     } catch (err) {
