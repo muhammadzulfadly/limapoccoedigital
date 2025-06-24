@@ -1,4 +1,4 @@
-import { Ban, Cog, FileText, BadgeCheck, UserCheck, Search, SlidersHorizontal, FileDown } from "lucide-react";
+import { Ban, Cog, FileText, BadgeCheck, UserCheck, Search, SlidersHorizontal} from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
@@ -7,33 +7,29 @@ export const metadata = {
 
 export async function getData() {
   return {
-    sedangProses: 0,
     butuhKonfirmasi: 0,
     ditolak: 1,
     selesai: 1,
   };
 }
-
 export default async function Page() {
   const data1 = await getData();
 
   const data = [
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Sedang proses", jenis: "SK tidak mampu", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Sedang proses", jenis: "SK tidak mampu", action: "Buka" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Butuh Konfirmasi", jenis: "SK tidak mampu", action: "Buka" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Butuh Konfirmasi", jenis: "SK tidak mampu", action: "Buka" },
     { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Butuh Konfirmasi", jenis: "SK Kehilangan", action: "Buka" },
     { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Ditolak", jenis: "SK Nikah", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Selesai", jenis: "SK Usaha", action: "Unduh" },
+    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Selesai", jenis: "SK Usaha", action: "Buka" },
   ];
 
   const statusStyle = {
     Selesai: "text-green-600 font-semibold",
     "Butuh Konfirmasi": "text-blue-600 font-semibold",
     Ditolak: "text-red-600 font-semibold",
-    "Sedang proses": "text-gray-500 font-semibold",
   };
 
   const iconStyle = {
-    Unduh: <FileDown className=" text-green-600" />,
     Buka: <Search className=" text-blue-600" />,
   };
 
@@ -46,15 +42,6 @@ export default async function Page() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Sedang Proses */}
-          <div className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
-            <div>
-              <div className="text-xl font-semibold">{data1.sedangProses}</div>
-              <div className="text-sm text-gray-500">Sedang Proses</div>
-            </div>
-            <Cog size={50} className="text-gray-500" />
-          </div>
-
           {/* Butuh Konfirmasi */}
           <div className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
             <div>
@@ -124,7 +111,7 @@ export default async function Page() {
                   <td className={`border border-black p-2 ${statusStyle[item.status]}`}>{item.status}</td>
                   <td className="px-4 py-2 border border-black">{item.jenis}</td>
                   <td className="border border-black p-2">
-                    <Link href={`/admin/pengajuan-surat/${item.id}`} className="flex justify-center items-center gap-1  hover:underline">
+                    <Link href={`/kepala-desa/pengajuan-surat/${item.id}`} className="flex justify-center items-center gap-1  hover:underline">
                       {iconStyle[item.action]}
                       <span className="text-sm">{item.action}</span>
                     </Link>
