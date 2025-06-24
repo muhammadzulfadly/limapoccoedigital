@@ -31,8 +31,8 @@ export default function Page() {
     if (!/^08\d{8,11}$/.test(form.no_whatsapp)) {
       newErrors.no_whatsapp = "Nomor telepon tidak valid. Harus dimulai dengan 08 dan 10-13 digit.";
     }
-    if (!/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/.test(form.password)) {
-      newErrors.password = "Kata sandi minimal 8 karakter dan kombinasi huruf & angka.";
+    if (!/^(?=.*[a-zA-Z])(?=.*\d).{12,}$/.test(form.password)) {
+      newErrors.password = "Kata sandi minimal 12 karakter dan kombinasi simbol, huruf besar, huruf kecil & angka.";
     }
     if (form.password !== form.password_confirmation) {
       newErrors.password_confirmation = "Konfirmasi password tidak cocok.";
@@ -43,7 +43,7 @@ export default function Page() {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // bersihkan error saat mengetik
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const handleSubmit = async (e) => {
@@ -57,14 +57,20 @@ export default function Page() {
         body: JSON.stringify(form),
       });
 
-      const result = await res.json().catch(() => null); // hindari crash
+      const result = await res.json().catch(() => null);
 
       if (!res.ok) {
-        const message =
-          result?.errors
-            ? Object.values(result.errors)[0][0]
-            : result?.message || "Terjadi kesalahan.";
-        setErrors({ general: message });
+        const newErrors = {};
+
+        if (result?.errors) {
+          if (result.errors.nik) newErrors.nik = result.errors.nik[0];
+          if (result.errors.no_whatsapp) newErrors.no_whatsapp = result.errors.no_whatsapp[0];
+          if (result.errors.name) newErrors.name = result.errors.name[0];
+          if (result.errors.password) newErrors.password = result.errors.password[0];
+        }
+
+        newErrors.general = result?.message || "Terjadi kesalahan saat mendaftar.";
+        setErrors(newErrors);
         return;
       }
 
@@ -79,17 +85,13 @@ export default function Page() {
 
   return (
     <div className="w-full max-w-md">
-      <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">←</button>
+      <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">
+        ←
+      </button>
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">DAFTAR AKUN</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Nama */}
-        <InputField
-          label="Nama Lengkap"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          error={errors.name}
-        />
+        <InputField label="Nama Lengkap" name="name" value={form.name} onChange={handleChange} error={errors.name} />
 
         {/* NIK */}
         <InputField
@@ -118,15 +120,7 @@ export default function Page() {
         />
 
         {/* Password */}
-        <PasswordField
-          label="Kata Sandi"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          error={errors.password}
-          visible={showPassword}
-          toggle={() => setShowPassword(!showPassword)}
-        />
+        <PasswordField label="Kata Sandi" name="password" value={form.password} onChange={handleChange} error={errors.password} visible={showPassword} toggle={() => setShowPassword(!showPassword)} />
 
         {/* Konfirmasi Password */}
         <PasswordField
@@ -138,11 +132,6 @@ export default function Page() {
           visible={showKonfirmasi}
           toggle={() => setShowKonfirmasi(!showKonfirmasi)}
         />
-
-        {/* General error */}
-        {errors.general && (
-          <p className="text-red-600 text-sm text-center">{errors.general}</p>
-        )}
 
         <button type="submit" className="w-full bg-green-500 text-white py-2 rounded text-sm font-semibold mt-4">
           Daftar
@@ -164,14 +153,7 @@ function InputField({ label, name, value, onChange, error, ...props }) {
   return (
     <div>
       <label className="text-xs font-semibold text-gray-600">{label}</label>
-      <input
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={`Masukkan ${label.toLowerCase()}`}
-        className={`w-full border ${error ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm`}
-        {...props}
-      />
+      <input name={name} value={value} onChange={onChange} placeholder={`Masukkan ${label.toLowerCase()}`} className={`w-full border ${error ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm`} {...props} />
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
