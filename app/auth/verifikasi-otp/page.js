@@ -6,24 +6,17 @@ import { useEffect, useState } from "react";
 export default function OTPPage() {
   const router = useRouter();
   const [otp, setOtp] = useState(new Array(6).fill(""));
-  const [error, setError] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(300); // 5 menit dalam detik
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300); // 5 menit
+  const [registrationToken, setRegistrationToken] = useState(null);
 
   const handleChange = (e, index) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
-
     const newOtp = [...otp];
-    if (value === "") {
-      newOtp[index] = "";
-      setOtp(newOtp);
-      return;
-    }
-
-    newOtp[index] = value.charAt(0);
+    newOtp[index] = value.charAt(0) || "";
     setOtp(newOtp);
-
-    // Fokus ke input selanjutnya jika ada
-    if (e.target.nextSibling) {
+    if (value && e.target.nextSibling) {
       e.target.nextSibling.focus();
     }
   };
@@ -37,16 +30,58 @@ export default function OTPPage() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const code = otp.join("");
-    if (code !== "112233") {
-      setError(true);
-    } else {
-      setError(false);
-      alert("OTP Valid");
-      router.push("/auth/lengkapi-profil");
+
+    if (!/^\d{6}$/.test(code)) {
+      setError("Kode OTP harus terdiri dari 6 angka.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/verifikasi-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          registration_token: registrationToken,
+          otp_code: code,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        localStorage.removeItem("registration_token");
+        localStorage.setItem("token", result.access_token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+        alert(result.message || "Verifikasi berhasil!");
+        router.push("/auth/lengkapi-profil");
+      } else {
+        setError(result.message || "Verifikasi gagal. Silakan coba lagi.");
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Gagal menghubungi server.");
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("registration_token");
+    if (!token) {
+      alert("Token registrasi tidak ditemukan. Silakan daftar ulang.");
+      router.push("/auth/daftar-akun");
+    } else {
+      setRegistrationToken(token);
+    }
+  }, [router]);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -57,10 +92,8 @@ export default function OTPPage() {
   }, [timeLeft]);
 
   const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
+    const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+    const s = String(seconds % 60).padStart(2, "0");
     return `${m}:${s}`;
   };
 
@@ -71,41 +104,45 @@ export default function OTPPage() {
       </button>
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">VERIFIKASI OTP</h2>
       <p className="text-center text-gray-600 mb-2">
-        Masukan kode OTP yang di kirim
-        <br />
-        ke nomor <span className="font-bold">081111111111</span>
+        Masukkan kode OTP yang dikirim ke nomor Anda<br />
       </p>
 
-      <div className="flex justify-between items-center gap-2 mt-6 mb-2">
-        {otp.map((digit, idx) => (
-          <input
-            key={idx}
-            type="text"
-            maxLength="1"
-            value={digit}
-            onChange={(e) => handleChange(e, idx)}
-            onKeyDown={(e) => handleKeyDown(e, idx)}
-            className={`w-12 h-14 text-center text-2xl border rounded-md focus:outline-none ${error ? "border-red-500 text-red-500" : "border-gray-400"}`}
-          />
-        ))}
-      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="flex justify-between items-center gap-2 mt-6 mb-2">
+          {otp.map((digit, idx) => (
+            <input
+              key={idx}
+              type="text"
+              maxLength="1"
+              value={digit}
+              onChange={(e) => handleChange(e, idx)}
+              onKeyDown={(e) => handleKeyDown(e, idx)}
+              className={`w-12 h-14 text-center text-2xl border rounded-md focus:outline-none ${
+                error ? "border-red-500 text-red-500" : "border-gray-400"
+              }`}
+            />
+          ))}
+        </div>
 
-      {error && <p className="text-red-500 text-center font-semibold mt-1">Kode OTP Tidak Valid</p>}
+        {error && <p className="text-red-500 text-center font-semibold mt-1">{error}</p>}
 
-      <div className={`text-center mt-4 ${timeLeft > 0 ? "text-green-600" : "text-red-600"}`}>{timeLeft > 0 ? formatTime(timeLeft) : "Kode OTP kadaluarsa. Silahkan kirim ulang kode"}</div>
+        <div className={`text-center mt-4 ${timeLeft > 0 ? "text-green-600" : "text-red-600"}`}>
+          {timeLeft > 0 ? formatTime(timeLeft) : "Kode OTP kadaluarsa. Silakan kirim ulang kode."}
+        </div>
 
-      <p className="text-right text-sm mt-2">
-        Tidak dapat kode OTP?{" "}
-        <a href="#" className="text-sm underline">
-          Kirim ulang kode
-        </a>
-      </p>
+        <p className="text-right text-sm mt-2">
+          Tidak dapat kode OTP?{" "}
+          <a href="#" className="text-sm underline">
+            Kirim ulang kode
+          </a>
+        </p>
 
-      <div className="flex justify-center mt-6">
-        <button onClick={handleSubmit} className="bg-green-500 text-white px-6 py-2 rounded-md">
-          Verifikasi
-        </button>
-      </div>
+        <div className="flex justify-center mt-6">
+          <button type="submit" disabled={loading} className="bg-green-500 text-white px-6 py-2 rounded-md">
+            {loading ? "Memverifikasi..." : "Verifikasi"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
