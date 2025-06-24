@@ -92,9 +92,6 @@ export default function Page() {
       </button>
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">DAFTAR AKUN</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Nama */}
-        <InputField label="Nama Lengkap" name="name" value={form.name} onChange={handleChange} error={errors.name} />
-
         {/* NIK */}
         <InputField
           label="NIK"
@@ -107,6 +104,9 @@ export default function Page() {
           }}
           error={errors.nik}
         />
+
+        {/* Nama */}
+        <InputField label="Nama Lengkap" name="name" value={form.name} onChange={handleChange} error={errors.name} />
 
         {/* Telepon */}
         <InputField
@@ -155,7 +155,7 @@ function InputField({ label, name, value, onChange, error, ...props }) {
   return (
     <div>
       <label className="text-xs font-semibold text-gray-600">{label}</label>
-      <input name={name} value={value} onChange={onChange} placeholder={`Masukkan ${label.toLowerCase()}`} className={`w-full border ${error ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm`} {...props} />
+      <input name={name} value={value} onChange={onChange} placeholder={`Masukkan ${label}`} className={`w-full border ${error ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm`} {...props} />
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
@@ -171,7 +171,7 @@ function PasswordField({ label, name, value, onChange, error, visible, toggle })
           name={name}
           value={value}
           onChange={onChange}
-          placeholder={`Masukkan ${label.toLowerCase()}`}
+          placeholder={`Masukkan ${label}`}
           className={`w-full border ${error ? "border-red-500" : "border-gray-300"} rounded p-2 mt-1 text-sm pr-10`}
         />
         <button type="button" onClick={toggle} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
