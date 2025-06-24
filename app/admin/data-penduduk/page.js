@@ -75,7 +75,7 @@ export default async function Page() {
                 <th className="border border-black px-2 py-2 ">Status Perkawinan</th>
                 <th className="border border-black px-2 py-2 ">Pekerjaan</th>
                 <th className="border border-black px-2 py-2 ">Hidup</th>
-                <th className="border border-black px-2 py-2 ">Aksi</th>
+                <th className="border border-black px-2 py-2 ">Action</th>
               </tr>
             </thead>
             <tbody>
