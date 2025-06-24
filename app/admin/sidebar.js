@@ -51,7 +51,7 @@ export default function Sidebar() {
           </Link>
         </li>
          <li>
-          <Link href="/admin/data-kependudukan" className={linkClass("/admin/data-kependudukan")}>
+          <Link href="/admin/data-penduduk" className={linkClass("/admin/data-penduduk")}>
             Data Penduduk
           </Link>
         </li>

@@ -26,7 +26,7 @@ export const getSidebarMenu = (role) => {
 
   const adminExtra = [
     { label: "Informasi Desa", href: "/admin/informasi-desa" },
-    { label: "Data Penduduk", href: "/admin/data-kependudukan" },
+    { label: "Data Penduduk", href: "/admin/data-penduduk" },
   ];
 
   if (role === "admin") {
