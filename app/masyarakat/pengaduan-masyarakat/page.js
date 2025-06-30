@@ -105,7 +105,7 @@ export default function Page() {
             {data.map((item, index) => (
               <tr key={index} className="bg-white text-center">
                 <td className="border border-black p-2">{new Date(item.created_at).toLocaleDateString('id-ID')}</td>
-                <td className="border border-black p-2">{item.jenis_pengaduan}</td>
+                <td className="border border-black p-2">{item.category}</td>
                 <td className={`border border-black p-2 ${statusStyle[item.status] || ''}`}>{item.status}</td>
                 <td className="border border-black p-2">
                   <Link

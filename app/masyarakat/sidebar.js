@@ -1,39 +1,57 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
-  const isPengajuanSuratActive = useMemo(() => pathname.startsWith("/masyarakat/pengajuan-surat"), [pathname]);
+  const isPengajuanSuratActive = useMemo(
+    () => pathname.startsWith("/masyarakat/pengajuan-surat"),
+    [pathname]
+  );
 
   const [isOpen, setIsOpen] = useState(isPengajuanSuratActive);
+  const [jenisSurat, setJenisSurat] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setIsOpen(isPengajuanSuratActive);
   }, [isPengajuanSuratActive]);
 
-  const isActive = (path) => pathname === path || pathname.startsWith(`${path}/`);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-  const linkClass = (path) => `${isActive(path) ? "text-green-500 font-medium" : "text-black"} hover:text-green-600 block`;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
 
-  const suratMenu = [
-    { label: "SK Tidak Mampu", href: "/masyarakat/pengajuan-surat/sk-tidak-mampu" },
-    { label: "SK Usaha", href: "/masyarakat/pengajuan-surat/sk-usaha" },
-    { label: "SKCK", href: "/masyarakat/pengajuan-surat/skck" },
-    { label: "SK Rekomendasi Pembelian BBM", href: "/masyarakat/pengajuan-surat/sk-rekomendasi-pembelian-bbm" },
-    { label: "SK Kelahiran", href: "/masyarakat/pengajuan-surat/sk-kelahiran" },
-    { label: "SK Kehilangan KK", href: "/masyarakat/pengajuan-surat/sk-kehilangan-kk" },
-    { label: "SK Belum Menikah", href: "/masyarakat/pengajuan-surat/sk-belum-menikah" },
-    { label: "SK Mahar", href: "/masyarakat/pengajuan-surat/sk-mahar" },
-    { label: "SK Nikah", href: "/masyarakat/pengajuan-surat/sk-nikah" },
-    { label: "SK Penghasilan", href: "/masyarakat/pengajuan-surat/sk-penghasilan" },
-    { label: "Surat Domisili", href: "/masyarakat/pengajuan-surat/surat-domisili" },
-    { label: "SK Belum Memiliki Rumah", href: "/masyarakat/pengajuan-surat/sk-belum-memiliki-rumah" },
-  ];
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/surat/all`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setJenisSurat(data.jenis_surat || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [router]);
+
+  const isActive = (path) =>
+    pathname === path || pathname.startsWith(`${path}/`);
+
+  const linkClass = (path) =>
+    `${isActive(path) ? "text-green-500 font-medium" : "text-black"} hover:text-green-600 block`;
 
   return (
     <aside className="w-56 p-4 h-[calc(100vh-64px)] overflow-y-auto sticky top-[64px]">
@@ -45,28 +63,54 @@ export default function Sidebar() {
           </Link>
         </li>
         <li>
-          <Link href="/masyarakat/pengaduan-masyarakat" className={linkClass("/masyarakat/pengaduan-masyarakat")}>
+          <Link
+            href="/masyarakat/pengaduan-masyarakat"
+            className={linkClass("/masyarakat/pengaduan-masyarakat")}
+          >
             Pengaduan
           </Link>
         </li>
         <li>
           <div className="flex items-center gap-7">
-            <Link href="/masyarakat/pengajuan-surat" className={`font-medium hover:text-green-600 ${isPengajuanSuratActive ? "text-green-500" : "text-black"}`}>
+            <Link
+              href="/masyarakat/pengajuan-surat"
+              className={`font-medium hover:text-green-600 ${
+                isPengajuanSuratActive ? "text-green-500" : "text-black"
+              }`}
+            >
               Pengajuan Surat
             </Link>
-            <button onClick={() => setIsOpen(!isOpen)} className="ml-1 focus:outline-none" aria-label="Toggle submenu">
-              <ChevronRight size={16} className={`transition-transform duration-300 ${isOpen ? "rotate-90 text-green-500" : "text-black"}`} />
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="ml-1 focus:outline-none"
+              aria-label="Toggle submenu"
+            >
+              <ChevronRight
+                size={16}
+                className={`transition-transform duration-300 ${
+                  isOpen ? "rotate-90 text-green-500" : "text-black"
+                }`}
+              />
             </button>
           </div>
           {isOpen && (
             <ul className="pl-4 mt-4 space-y-3 text-sm">
-              {suratMenu.map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className={linkClass(item.href)}>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {loading ? (
+                <li className="italic text-gray-500">Memuat...</li>
+              ) : (
+                jenisSurat.map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href={`/masyarakat/pengajuan-surat/${item.id}`}
+                      className={linkClass(
+                        `/masyarakat/pengajuan-surat/${item.id}`
+                      )}
+                    >
+                      {item.nama_surat}
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           )}
         </li>
