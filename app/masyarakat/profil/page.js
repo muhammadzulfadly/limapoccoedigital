@@ -17,22 +17,63 @@ export default function ProfilePage() {
     rtRw: "",
   });
 
-  useEffect(() => {
-    // Simulasi ambil dari localStorage
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setForm({
-        nama: user.name || "Asep sofyan",
-        tempatLahir: "Makasar",
-        tanggalLahir: "17 agustus 1995",
-        jenisKelamin: "Laki laki",
-        alamat: "Jl. bunga matahari no.10",
-        pekerjaan: "Petani",
-        dusun: "Bontotangnga",
-        rtRw: "RT 03/ RW 07",
-      });
+  // Ambil nama dari localStorage
+  const fetchNamaFromLocal = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setForm((prev) => ({
+          ...prev,
+          nama: user?.user?.name || "",
+        }));
+      }
+    } catch (err) {
+      console.error("Gagal mengambil nama dari localStorage:", err);
     }
+  };
+
+  // Ambil data user dari API
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Token tidak ditemukan");
+
+      const res = await fetch("/api/auth/profil", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) throw new Error("Gagal mengambil data user");
+
+      const data = await res.json();
+
+      setForm((prev) => ({
+        ...prev,
+        nama: data.user?.name || "",
+        tempatLahir: data.profile?.tempat_lahir || "",
+        tanggalLahir: data.profile?.tanggal_lahir || "",
+        jenisKelamin: data.profile?.jenis_kelamin || "",
+        alamat: data.profile?.alamat || "",
+        pekerjaan: data.profile?.pekerjaan || "",
+        dusun: data.profile?.dusun || "",
+        rtRw: data.profile?.rt_rw || "",
+      }));
+
+      // Simpan kembali data ke localStorage
+      localStorage.setItem("user", JSON.stringify(data));
+    } catch (error) {
+      console.error(error);
+      alert("Gagal memuat data profil. Silakan login ulang.");
+    }
+  };
+
+  useEffect(() => {
+    fetchNamaFromLocal();
+    fetchUser();
   }, []);
 
   const handleChange = (e) => {
@@ -43,11 +84,34 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    alert("Logged out!");
-    router.push("/beranda");
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Token tidak ditemukan");
+
+      const res = await fetch("/api/auth/keluar-akun", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json", // penting untuk memastikan JSON response
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Logout gagal.");
+      }
+
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+
+      alert("Berhasil logout.");
+      router.push("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+      alert(err.message || "Gagal logout. Silakan coba lagi.");
+    }
   };
 
   return (
@@ -69,7 +133,7 @@ export default function ProfilePage() {
         <form className="grid grid-cols-1 md:grid-cols-2 gap-6 text-black">
           <div>
             <label className="text-xs font-semibold">Nama</label>
-            <input type="text" name="nama" value={form.nama} onChange={handleChange} className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none" />
+            <input type="text" name="nama" value={form.nama} readOnly className="mt-1 w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-3 text-sm outline-none" />
           </div>
 
           <div>
@@ -79,13 +143,13 @@ export default function ProfilePage() {
 
           <div>
             <label className="text-xs font-semibold">Tanggal Lahir</label>
-            <input type="text" name="tanggalLahir" value={form.tanggalLahir} onChange={handleChange} className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none" />
+            <input type="date" name="tanggalLahir" value={form.tanggalLahir} onChange={handleChange} className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none" />
           </div>
 
           <div className="relative">
             <label className="text-xs font-semibold">Jenis Kelamin</label>
             <select name="jenisKelamin" value={form.jenisKelamin} onChange={handleChange} className="mt-1 appearance-none w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none">
-              <option value="Laki laki">Laki laki</option>
+              <option value="Laki-laki">Laki-laki</option>
               <option value="Perempuan">Perempuan</option>
             </select>
             <ChevronDown className="absolute right-3 bottom-3 text-black pointer-events-none" size={16} />

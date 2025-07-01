@@ -1,27 +1,25 @@
-// app/api/auth/masuk-akun/route.js
-
+// app/auth/verifikasi-otp/route.js
 export async function POST(req) {
-  try {
-    const body = await req.json();
+  const body = await req.json();
 
-    const res = await fetch(`${process.env.API_SECRET_URL}/api/auth/login`, {
+  try {
+    const res = await fetch(`${process.env.API_SECRET_URL}/api/auth/register/resend`, {
       method: "POST",
       headers: {
-        Accept: "application/json",
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(body),
     });
 
     const data = await res.json();
-
     return new Response(JSON.stringify(data), {
       status: res.status,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error) {
-    console.error("API Error:", error);
-    return new Response(JSON.stringify({ message: "Terjadi kesalahan pada server." }), {
+  } catch (err) {
+    console.error("API error:", err);
+    return new Response(JSON.stringify({ message: "Gagal menghubungi server." }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

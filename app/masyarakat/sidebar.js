@@ -30,7 +30,7 @@ export default function Sidebar() {
       return;
     }
 
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/surat/all`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat`, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",

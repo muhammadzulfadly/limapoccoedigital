@@ -12,6 +12,8 @@ export default function OTPPage() {
   const [registrationToken, setRegistrationToken] = useState(null);
   const [noWhatsapp, setNoWhatsapp] = useState("");
 
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   const blurNumber = (num) => {
     return num.replace(/^(\d{3})\d+(?=\d{3})/, "$1xxxxxxx");
   };
@@ -79,6 +81,54 @@ export default function OTPPage() {
     }
   };
 
+  const handleResendOtp = async (e) => {
+    e.preventDefault();
+
+    if (resendCooldown > 0) {
+      setError(`Silakan tunggu ${resendCooldown} detik sebelum mengirim ulang.`);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/kirim-ulang-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          registration_token: registrationToken,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        alert(result.message || "Kode OTP baru telah dikirim.");
+        setOtp(new Array(6).fill(""));
+        setTimeLeft(300); // reset waktu OTP jika diperlukan
+        setResendCooldown(60); // 🔒 mulai cooldown 60 detik
+      } else {
+        setError(result.message || "Gagal mengirim ulang kode.");
+      }
+    } catch (err) {
+      console.error("Resend error:", err);
+      setError("Terjadi kesalahan saat mengirim ulang OTP.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
   useEffect(() => {
     const token = localStorage.getItem("registration_token");
     if (!token) {
@@ -129,24 +179,18 @@ export default function OTPPage() {
               value={digit}
               onChange={(e) => handleChange(e, idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
-              className={`w-12 h-14 text-center text-2xl border rounded-md focus:outline-none ${
-                error ? "border-red-500 text-red-500" : "border-gray-400"
-              }`}
+              className={`w-12 h-14 text-center text-2xl border rounded-md focus:outline-none ${error ? "border-red-500 text-red-500" : "border-gray-400"}`}
             />
           ))}
         </div>
 
-        {error && <p className="text-red-500 text-center font-semibold mt-1">{error}</p>}
-
-        <div className={`text-center mt-4 ${timeLeft > 0 ? "text-green-600" : "text-red-600"}`}>
-          {timeLeft > 0 ? formatTime(timeLeft) : "Kode OTP kadaluarsa. Silakan kirim ulang kode."}
-        </div>
+        <div className={`text-center mt-4 ${timeLeft > 0 ? "text-green-600" : "text-red-600"}`}>{timeLeft > 0 ? formatTime(timeLeft) : "Kode OTP kadaluarsa. Silakan daftar ulang."}</div>
 
         <p className="text-right text-sm mt-2">
           Tidak dapat kode OTP?{" "}
-          <a href="#" className="text-sm underline">
-            Kirim ulang kode
-          </a>
+          <button type="button" onClick={handleResendOtp} disabled={loading || resendCooldown > 0} className="text-sm hover:underline text-black disabled:opacity-50">
+            {resendCooldown > 0 ? `Kirim ulang (${resendCooldown})` : "Kirim ulang kode"}
+          </button>
         </p>
 
         <div className="flex justify-center mt-6">

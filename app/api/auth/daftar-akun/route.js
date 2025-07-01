@@ -2,7 +2,7 @@ export async function POST(req) {
   const body = await req.json();
 
   try {
-    const res = await fetch(`${process.env.API_SECRET_URL}/api/v1/register`, {
+    const res = await fetch(`${process.env.API_SECRET_URL}/api/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

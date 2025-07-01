@@ -1,16 +1,14 @@
-// app/api/auth/masuk-akun/route.js
-
-export async function POST(req) {
+export async function GET(req) {
   try {
-    const body = await req.json();
+    const token = req.headers.get("Authorization");
 
-    const res = await fetch(`${process.env.API_SECRET_URL}/api/auth/login`, {
-      method: "POST",
+    const res = await fetch(`${process.env.API_SECRET_URL}/api/profile/masyarakat`, {
+      method: "GET",
       headers: {
-        Accept: "application/json",
         "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: token,
       },
-      body: JSON.stringify(body),
     });
 
     const data = await res.json();
@@ -21,7 +19,7 @@ export async function POST(req) {
     });
   } catch (error) {
     console.error("API Error:", error);
-    return new Response(JSON.stringify({ message: "Terjadi kesalahan pada server." }), {
+    return new Response(JSON.stringify({ message: "Terjadi kesalahan server." }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

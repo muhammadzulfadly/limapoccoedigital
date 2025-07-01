@@ -1,16 +1,21 @@
 export async function POST(req) {
   try {
-    const body = await req.json();
-    const token = req.headers.get("Authorization");
+    const token = req.headers.get("authorization");
 
-    const res = await fetch(`${process.env.API_SECRET_URL}/api/profile/lengkapi-profil`, {
+    if (!token) {
+      return new Response(JSON.stringify({ message: "Token tidak ditemukan." }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const res = await fetch(`${process.env.API_SECRET_URL}/api/auth/logout`, {
       method: "POST",
       headers: {
+        "Authorization": token,
+        "Accept": "application/json",
         "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: token,
       },
-      body: JSON.stringify(body),
     });
 
     const data = await res.json();
