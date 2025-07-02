@@ -33,9 +33,8 @@ export default function PengaduanPage() {
     if (name === "bukti" && files.length > 0) {
       const file = files[0];
 
-      if (file.size > 10 * 1024 * 1024) {
-        // 5MB
-        alert("Ukuran file maksimal 10MB.");
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Ukuran file maksimal 2MB.");
         return;
       }
 
@@ -60,8 +59,8 @@ export default function PengaduanPage() {
       if (!allowedTypes.includes(form.bukti.type)) {
         newError.bukti = "File harus berupa gambar JPG, JPEG, atau PNG.";
       }
-      if (form.bukti.size > 10 * 1024 * 1024) {
-        newError.bukti = "Ukuran file maksimal 10MB.";
+      if (form.bukti.size > 2 * 1024 * 1024) {
+        newError.bukti = "Ukuran file maksimal 2MB.";
       }
     }
 
@@ -164,7 +163,7 @@ export default function PengaduanPage() {
                 <UploadCloud className="mx-auto mb-2 text-green-500" />
                 <label className="cursor-pointer text-green-600 font-semibold">
                   Upload Foto
-                  <p className="text-xs text-gray-500 mt-1">Format yang didukung: JPG, JPEG, PNG. Maks 10MB</p>
+                  <p className="text-xs text-gray-500 mt-1">Format yang didukung: JPG, JPEG, PNG. Maks 2MB</p>
                   <input type="file" name="bukti" onChange={handleChange} className="hidden" accept="image/*" />
                 </label>
                 {form.bukti && <p className="mt-2 text-sm text-gray-600">File: {form.bukti.name}</p>}

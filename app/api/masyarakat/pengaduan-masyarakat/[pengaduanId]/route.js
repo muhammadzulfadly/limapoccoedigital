@@ -1,24 +1,15 @@
-export async function POST(req) {
+// File: app/api/pengaduan-masyarakat/[pengaduanId]/route.js
+
+export async function GET(req, { params }) {
   try {
     const token = req.headers.get("authorization");
-    const formData = await req.formData();
+    const { pengaduanId } = params;
 
-    const evidence = formData.get("evidence");
-
-    // Validasi ukuran file maksimal 2MB (jika file ada)
-    if (evidence && evidence.size > 2 * 1024 * 1024) {
-      return new Response(
-        JSON.stringify({ message: "Ukuran file melebihi batas maksimal 2MB." }),
-        { status: 400 }
-      );
-    }
-
-    const res = await fetch(`${process.env.API_SECRET_URL}/api/pengaduan`, {
-      method: "POST",
+    const res = await fetch(`${process.env.API_SECRET_URL}/api/pengaduan/${pengaduanId}`, {
+      method: "GET",
       headers: {
         Authorization: token,
       },
-      body: formData,
     });
 
     const contentType = res.headers.get("content-type") || "";
@@ -37,8 +28,8 @@ export async function POST(req) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("API Error:", error);
-    return new Response(JSON.stringify({ message: "Terjadi kesalahan server." }), {
+    console.error("Detail error:", error);
+    return new Response(JSON.stringify({ message: "Gagal fetch data pengaduan." }), {
       status: 500,
     });
   }

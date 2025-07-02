@@ -1,4 +1,5 @@
 'use client'
+
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -6,14 +7,45 @@ export default function DetailAjuanSuratPage() {
   const { jenisSurat, ajuanId } = useParams()
   const router = useRouter()
   const [ajuan, setAjuan] = useState(null)
+  const [slug, setSlug] = useState(null)
 
+  // Ambil slug dari ID surat
   useEffect(() => {
     const token = localStorage.getItem('token')
+    if (!token || !jenisSurat) return
+
+    const fetchSlug = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        })
+
+        const data = await res.json()
+        const found = data.jenis_surat?.find(
+          (item) => item.id.toString() === jenisSurat
+        )
+        if (found) setSlug(found.slug)
+        else throw new Error('Surat tidak ditemukan')
+      } catch (err) {
+        console.error('⚠️ Gagal mendapatkan slug:', err)
+      }
+    }
+
+    fetchSlug()
+  }, [jenisSurat])
+
+  // Fetch detail pengajuan setelah slug tersedia
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!slug || !ajuanId) return
 
     const fetchDetailAjuan = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/ajuan-surat/masyarakat/${jenisSurat}/${ajuanId}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${slug}/pengajuan/${ajuanId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -24,18 +56,17 @@ export default function DetailAjuanSuratPage() {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
 
         const json = await res.json()
-        setAjuan(json.ajuan_surat)
+        console.log(json);
+        setAjuan(json.pengajuan_surat)
       } catch (err) {
         console.error('⚠️ Gagal fetch detail ajuan:', err)
       }
     }
 
-    if (jenisSurat && ajuanId) fetchDetailAjuan()
-  }, [jenisSurat, ajuanId])
+    fetchDetailAjuan()
+  }, [slug, ajuanId])
 
- 
-
-return (
+  return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
       <h2 className="text-2xl font-bold mb-4">📄 Detail Pengajuan Surat</h2>
 
@@ -59,16 +90,23 @@ return (
           <div className="mb-6">
             <p className="mb-2"><strong>Status:</strong> {ajuan.status}</p>
             <p className="mb-2"><strong>Nomor Surat:</strong> {ajuan.nomor_surat || '-'}</p>
-            <p className="mb-2"><strong>Lampiran:</strong> {Array.isArray(ajuan.lampiran) ? ajuan.lampiran.map((file, idx) => (
-              <a
-                key={idx}
-                href={`${process.env.NEXT_PUBLIC_FILE_URL}/${file}`}
-                className="text-blue-600 underline mr-2"
-                target="_blank"
-              >
-                File {idx + 1}
-              </a>
-            )) : '-'}</p>
+            <p className="mb-2">
+              <strong>Lampiran:</strong>{' '}
+              {Array.isArray(ajuan.lampiran) ? (
+                ajuan.lampiran.map((file, idx) => (
+                  <a
+                    key={idx}
+                    href={`${process.env.NEXT_PUBLIC_FILE_URL}/${file}`}
+                    className="text-blue-600 underline mr-2"
+                    target="_blank"
+                  >
+                    File {idx + 1}
+                  </a>
+                ))
+              ) : (
+                '-'
+              )}
+            </p>
           </div>
 
           {/* 📋 Formulir */}
@@ -94,7 +132,5 @@ return (
         </>
       )}
     </div>
-)
-
-  
+  )
 }

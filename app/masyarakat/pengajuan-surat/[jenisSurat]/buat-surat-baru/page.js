@@ -3,7 +3,6 @@
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-
 const formSchemaBySuratKode = {
   SKTM: [
     { name: "nama_ayah", label: "Nama Ayah", type: "text" },
@@ -18,17 +17,16 @@ const formSchemaBySuratKode = {
     { name: "nama_usaha", label: "Nama Usaha", type: "text" },
     { name: "lokasi_usaha", label: "Lokasi Usaha", type: "text" },
   ],
-  // Tambahkan schema lainnya sesuai kebutuhan...
 };
 
 export default function BuatSuratBaru() {
   const router = useRouter();
-  const { jenisSurat } = useParams();
-
+  const { jenisSurat } = useParams(); // ini adalah ID
   const [formKey, setFormKey] = useState(null);
   const [formData, setFormData] = useState({});
   const [lampiran, setLampiran] = useState(null);
   const [surat, setSurat] = useState(null);
+  const [suratSlug, setSuratSlug] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileInfo, setProfileInfo] = useState({});
 
@@ -38,19 +36,26 @@ export default function BuatSuratBaru() {
       if (!token || !jenisSurat) return;
 
       try {
-        const suratRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/surat/${jenisSurat}`, {
+        // Ambil daftar jenis surat
+        const suratRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
         });
         const suratData = await suratRes.json();
-        console.log(suratData);
-        setSurat(suratData.jenis_surat);
-        setFormKey(suratData.jenis_surat?.kode_surat);
+        const selected = suratData.jenis_surat?.find(
+          (item) => item.id.toString() === jenisSurat
+        );
 
+        if (!selected) throw new Error("Surat tidak ditemukan.");
+        setSurat(selected);
+        setFormKey(selected.kode_surat);
+        setSuratSlug(selected.slug); // simpan slug untuk post
+
+        // Ambil profil user
         const profileRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/profile/cek-profil/masyarakat`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/profile/masyarakat`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -60,6 +65,7 @@ export default function BuatSuratBaru() {
         );
         const profileJson = await profileRes.json();
         setProfileInfo(profileJson?.user || {});
+        console.log(profileJson?.user);
       } catch (err) {
         console.error("Gagal memuat data:", err);
         alert("Gagal memuat data");
@@ -87,14 +93,17 @@ export default function BuatSuratBaru() {
     if (lampiran) data.append("lampiran", lampiran);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/ajuan-surat/masyarakat/${jenisSurat}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-        body: data,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${suratSlug}/pengajuan`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+          body: data,
+        }
+      );
 
       const result = await res.json();
       if (!res.ok) {
@@ -113,83 +122,83 @@ export default function BuatSuratBaru() {
   const fields = formSchemaBySuratKode[formKey] || [];
 
   return (
-      <div className="max-w-3xl mx-auto bg-white p-6 shadow rounded">
-        <h2 className="text-2xl font-bold mb-6">
-          📝 Pengajuan Surat {surat?.nama_surat || ""}
-        </h2>
+    <div className="max-w-3xl mx-auto bg-white p-6 shadow rounded">
+      <h2 className="text-2xl font-bold mb-6">
+        📝 Pengajuan Surat {surat?.nama_surat || ""}
+      </h2>
 
-        {loading ? (
-          <p>⏳ Memuat data formulir...</p>
-        ) : !formKey ? (
-          <p className="text-red-600">Formulir tidak tersedia untuk jenis surat ini.</p>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Informasi pengguna */}
-            <fieldset className="border p-4 rounded bg-gray-50">
-              <legend className="text-sm font-semibold text-gray-700">👤 Data Pemohon</legend>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                <div>
-                  <label className="text-sm block text-gray-600 mb-1">Nama</label>
-                  <input
-                    type="text"
-                    value={profileInfo?.name || "-"}
-                    disabled
-                    className="w-full border px-3 py-2 rounded bg-gray-100"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm block text-gray-600 mb-1">NIK</label>
-                  <input
-                    type="text"
-                    value={profileInfo?.nik || "-"}
-                    disabled
-                    className="w-full border px-3 py-2 rounded bg-gray-100"
-                  />
-                </div>
+      {loading ? (
+        <p>⏳ Memuat data formulir...</p>
+      ) : !formKey ? (
+        <p className="text-red-600">Formulir tidak tersedia untuk jenis surat ini.</p>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Informasi pengguna */}
+          <fieldset className="border p-4 rounded bg-gray-50">
+            <legend className="text-sm font-semibold text-gray-700">👤 Data Pemohon</legend>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+              <div>
+                <label className="text-sm block text-gray-600 mb-1">Nama</label>
+                <input
+                  type="text"
+                  value={profileInfo?.name || "-"}
+                  disabled
+                  className="w-full border px-3 py-2 rounded bg-gray-100"
+                />
               </div>
-            </fieldset>
-
-            {/* Form dinamis */}
-            <div>
-              <h3 className="text-sm font-semibold mb-2">📋 Data Tambahan</h3>
-              <div className="space-y-4">
-                {fields.map((field) => (
-                  <div key={field.name}>
-                    <label className="block text-sm mb-1">{field.label}</label>
-                    <input
-                      type={field.type}
-                      name={field.name}
-                      value={formData[field.name] || ""}
-                      onChange={handleChange}
-                      required
-                      className="w-full border px-3 py-2 rounded"
-                    />
-                  </div>
-                ))}
+              <div>
+                <label className="text-sm block text-gray-600 mb-1">NIK</label>
+                <input
+                  type="text"
+                  value={profileInfo?.nik || "-"}
+                  disabled
+                  className="w-full border px-3 py-2 rounded bg-gray-100"
+                />
               </div>
             </div>
+          </fieldset>
 
-            {/* Upload lampiran */}
-            <div>
-              <label className="block text-sm font-medium mb-1">📎 Lampiran (opsional)</label>
-              <input
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => setLampiran(e.target.files[0])}
-                className="w-full"
-              />
+          {/* Form dinamis */}
+          <div>
+            <h3 className="text-sm font-semibold mb-2">📋 Data Tambahan</h3>
+            <div className="space-y-4">
+              {fields.map((field) => (
+                <div key={field.name}>
+                  <label className="block text-sm mb-1">{field.label}</label>
+                  <input
+                    type={field.type}
+                    name={field.name}
+                    value={formData[field.name] || ""}
+                    onChange={handleChange}
+                    required
+                    className="w-full border px-3 py-2 rounded"
+                  />
+                </div>
+              ))}
             </div>
+          </div>
 
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded font-semibold"
-              >
-                🚀 Ajukan Surat
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
+          {/* Upload lampiran */}
+          <div>
+            <label className="block text-sm font-medium mb-1">📎 Lampiran (opsional)</label>
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={(e) => setLampiran(e.target.files[0])}
+              className="w-full"
+            />
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="submit"
+              className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded font-semibold"
+            >
+              🚀 Ajukan Surat
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }

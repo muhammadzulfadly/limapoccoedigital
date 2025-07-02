@@ -21,18 +21,18 @@ export default function Sidebar() {
   const linkClass = (path) => `${isActive(path) ? "text-green-500 font-medium" : "text-black"} hover:text-green-600 block`;
 
   const suratMenu = [
-    { label: "SK Tidak Mampu", href: "/admin/pengajuan-surat/sk-tidak-mampu" },
-    { label: "SK Usaha", href: "/admin/pengajuan-surat/sk-usaha" },
+    { label: "Surat Keterangan Tidak Mampu", href: "/admin/pengajuan-surat/sk-tidak-mampu" },
+    { label: "Surat Keterangan Usaha", href: "/admin/pengajuan-surat/sk-usaha" },
     { label: "SKCK", href: "/admin/pengajuan-surat/skck" },
-    { label: "SK Rekomendasi Pembelian BBM", href: "/admin/pengajuan-surat/sk-rekomendasi-pembelian-bbm" },
-    { label: "SK Kelahiran", href: "/admin/pengajuan-surat/sk-kelahiran" },
-    { label: "SK Kehilangan KK", href: "/admin/pengajuan-surat/sk-kehilangan-kk" },
-    { label: "SK Belum Menikah", href: "/admin/pengajuan-surat/sk-belum-menikah" },
-    { label: "SK Mahar", href: "/admin/pengajuan-surat/sk-mahar" },
-    { label: "SK Nikah", href: "/admin/pengajuan-surat/sk-nikah" },
-    { label: "SK Penghasilan", href: "/admin/pengajuan-surat/sk-penghasilan" },
+    { label: "Surat Keterangan Rekomendasi Pembelian BBM", href: "/admin/pengajuan-surat/sk-rekomendasi-pembelian-bbm" },
+    { label: "Surat Keterangan Kelahiran", href: "/admin/pengajuan-surat/sk-kelahiran" },
+    { label: "Surat Keterangan Kehilangan KK", href: "/admin/pengajuan-surat/sk-kehilangan-kk" },
+    { label: "Surat Keterangan Belum Menikah", href: "/admin/pengajuan-surat/sk-belum-menikah" },
+    { label: "Surat Keterangan Mahar", href: "/admin/pengajuan-surat/sk-mahar" },
+    { label: "Surat Keterangan Nikah", href: "/admin/pengajuan-surat/sk-nikah" },
+    { label: "Surat Keterangan Penghasilan", href: "/admin/pengajuan-surat/sk-penghasilan" },
     { label: "Surat Domisili", href: "/admin/pengajuan-surat/surat-domisili" },
-    { label: "SK Belum Memiliki Rumah", href: "/admin/pengajuan-surat/sk-belum-memiliki-rumah" },
+    { label: "Surat Keterangan Belum Memiliki Rumah", href: "/admin/pengajuan-surat/sk-belum-memiliki-rumah" },
   ];
 
   return (

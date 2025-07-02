@@ -3,7 +3,7 @@ export async function GET(req) {
   try {
     const token = req.headers.get('authorization');
 
-    const res = await fetch(`${process.env.API_SECRET_URL}/api/v1/aduan/all`, {
+    const res = await fetch(`${process.env.API_SECRET_URL}/api/pengaduan`, {
       method: 'GET',
       headers: {
         Authorization: token,
