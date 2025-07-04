@@ -74,7 +74,7 @@ export default function PreviewSuratPage() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${slug}/pengajuan/${ajuanId}/status`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${slug}/pengajuan/${ajuanId}/confirmed`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

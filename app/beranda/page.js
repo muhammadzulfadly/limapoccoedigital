@@ -265,7 +265,12 @@ export default function HomePage() {
       </section>
 
       {/* Tombol WhatsApp Floating */}
-      <a href="https://wa.me/62881080268674" target="_blank" rel="noopener noreferrer" className="fixed bottom-4 right-4 z-50 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-lg transition">
+      <a
+        href="https://wa.me/62881080268674?text=Menu"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-4 right-4 z-50 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-lg transition"
+      >
         <Image src="/icons/whatsapp.svg" alt="WhatsApp" width={20} height={20} />
         <span className="text-sm font-medium">Chat</span>
       </a>

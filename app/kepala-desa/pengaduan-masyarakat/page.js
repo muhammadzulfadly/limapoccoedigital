@@ -1,41 +1,64 @@
-import { Clock, CheckCheck, UserCheck, FileText, Search, SlidersHorizontal } from "lucide-react";
-import Link from "next/link";
+'use client';
 
-export const metadata = {
-  title: "Dashboard Pengaduan Masyarakat",
-};
+import { useEffect, useState } from 'react';
+import { Clock, CheckCheck, UserCheck, FileText, Search, SlidersHorizontal } from 'lucide-react';
+import Link from 'next/link';
 
-export default async function Page() {
+export default function Page() {
+  const [data, setData] = useState([]);
 
-  const data = [
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Menunggu", kategori: "Fasilitas Desa", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Diterima", kategori: "Layanan Masyarakat", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Selesai", kategori: "Fasilitas Desa", action: "Buka" },
-  ];
+  useEffect(() => {
+    const fetchAduan = async () => {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/kepala-desa/pengaduan-masyarakat', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await res.json();
+
+      const statusMap = {
+        processed: 'Diterima',
+        approved: 'Selesai',
+      };
+
+      const filteredData = (result.aduan || []).filter(
+        (item) => item.status === 'processed' || item.status === 'approved'
+      );
+
+      const mappedData = filteredData.map((item) => ({
+        ...item,
+        status: statusMap[item.status] || item.status,
+      }));
+
+      setData(mappedData);
+    };
+
+    fetchAduan();
+  }, []);
 
   const statusStyle = {
-    Selesai: "text-green-600 font-semibold",
-    Diterima: "text-teal-800 font-semibold",
-    Menunggu: "text-orange-600 font-semibold",
+    Selesai: 'text-green-600 font-semibold',
+    Diterima: 'text-teal-800 font-semibold',
   };
 
   const iconStyle = {
-    Buka: <Search className=" text-blue-600" />,
+    Buka: <Search className="text-blue-600" />,
   };
 
   return (
     <div className="flex h-full">
-      {/* Main Content */}
       <div className="flex-1 bg-gray-100 p-8">
         <header>
           <h1 className="text-xl font-bold mb-6">Dashboard Pengaduan</h1>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          {["Menunggu", "Diterima", "Selesai"].map((status) => {
+          {['Diterima', 'Selesai'].map((status) => {
             const jumlah = data.filter((item) => item.status === status).length;
-            const Icon = status === "Menunggu" ? Clock : status === "Diterima" ? CheckCheck : UserCheck;
-            const iconColor = status === "Menunggu" ? "text-orange-500" : status === "Diterima" ? "text-teal-800" : "text-green-600";
+            const Icon = status === 'Diterima' ? CheckCheck : UserCheck;
+            const iconColor = status === 'Diterima' ? 'text-teal-800' : 'text-green-600';
 
             return (
               <div key={status} className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
@@ -50,7 +73,7 @@ export default async function Page() {
 
           <div className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
             <div>
-              <p className="font-semibold">User Guid</p>
+              <p className="font-semibold">User Guide</p>
               <Link href="#" className="text-sm text-gray-500 hover:underline">
                 Lihat panduan
               </Link>
@@ -77,25 +100,36 @@ export default async function Page() {
                 <th className="px-4 py-2 w-1/5 border border-black">Nama</th>
                 <th className="px-4 py-2 w-1/5 border border-black">Status</th>
                 <th className="px-4 py-2 w-1/5 border border-black">Kategori Pengaduan</th>
-                <th className="px-4 py-2 w-1/5 border border-black">Action</th>
+                <th className="px-4 py-2 w-1/5 border border-black">Aksi</th>
               </tr>
             </thead>
-
             <tbody>
               {data.map((item, index) => (
                 <tr key={index} className="bg-white text-center">
-                  <td className="px-4 py-2 border border-black">{item.tanggal}</td>
-                  <td className="px-4 py-2 border border-black">{item.nama}</td>
-                  <td className={`border border-black p-2 ${statusStyle[item.status]}`}>{item.status}</td>
-                  <td className="px-4 py-2 border border-black">{item.kategori}</td>
+                  <td className="px-4 py-2 border border-black">
+                    {new Date(item.created_at).toLocaleDateString('id-ID')}
+                  </td>
+                  <td className="px-4 py-2 border border-black">{item.user?.name || '-'}</td>
+                  <td className={`border border-black p-2 ${statusStyle[item.status] || ''}`}>{item.status}</td>
+                  <td className="px-4 py-2 border border-black">{item.category}</td>
                   <td className="border border-black p-2">
-                    <Link href={`/pengaduan/${item.id}`} className="flex justify-center items-center gap-1  hover:underline">
-                      {iconStyle[item.action]}
-                      <span className="text-sm">{item.action}</span>
+                    <Link
+                      href={`/kepala-desa/pengaduan-masyarakat/${item.id}`}
+                      className="flex justify-center items-center gap-1 hover:underline"
+                    >
+                      {iconStyle['Buka']}
+                      <span className="text-sm">Buka</span>
                     </Link>
                   </td>
                 </tr>
               ))}
+              {data.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="bg-white text-center text-black py-4">
+                    Belum ada proses pengaduan.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

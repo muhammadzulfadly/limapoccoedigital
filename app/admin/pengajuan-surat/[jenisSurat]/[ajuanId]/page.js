@@ -8,63 +8,83 @@ export default function DetailAjuanSuratPage() {
   const router = useRouter();
   const [ajuan, setAjuan] = useState(null);
   const [slug, setSlug] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Ambil slug dari ID surat
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token || !jenisSurat) return;
-
     const fetchSlug = async () => {
       try {
+        const token = localStorage.getItem("token");
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat`, {
           headers: {
             Authorization: `Bearer ${token}`,
-            Accept: "application/json",
           },
         });
 
         const data = await res.json();
         const found = data.jenis_surat?.find((item) => item.id.toString() === jenisSurat);
         if (found) setSlug(found.slug);
-        else throw new Error("Surat tidak ditemukan");
       } catch (err) {
-        console.error("⚠️ Gagal mendapatkan slug:", err);
+        console.error("⚠️ Gagal mengambil slug:", err);
       }
     };
 
-    fetchSlug();
+    if (jenisSurat) fetchSlug();
   }, [jenisSurat]);
 
-  // Fetch detail pengajuan setelah slug tersedia
+  // Ambil detail pengajuan
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!slug || !ajuanId) return;
-
-    const fetchDetailAjuan = async () => {
+    const fetchDetail = async () => {
       try {
+        const token = localStorage.getItem("token");
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${slug}/pengajuan/${ajuanId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
-            Accept: "application/json",
           },
         });
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
         const json = await res.json();
         setAjuan(json.pengajuan_surat);
       } catch (err) {
         console.error("⚠️ Gagal fetch detail ajuan:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchDetailAjuan();
+    if (slug && ajuanId) fetchDetail();
   }, [slug, ajuanId]);
+
+  const isMasyarakat = ajuan?.user?.profile_masyarakat !== null;
+
+  const handleTolak = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${slug}/pengajuan/${ajuanId}/rejected`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "ditolak" }),
+      });
+
+      if (!res.ok) throw new Error("Gagal menolak surat.");
+      router.push(`/admin/pengajuan-surat/${jenisSurat}`);
+    } catch (err) {
+      alert("Terjadi kesalahan saat menolak surat.");
+    }
+  };
+
+  const handleTerima = () => {
+    router.push(`/admin/pengajuan-surat/${jenisSurat}/${ajuanId}/nomor-surat`);
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
       <h2 className="text-2xl font-bold mb-4">📄 Detail Pengajuan Surat</h2>
 
-      {!ajuan ? (
+      {loading || !ajuan ? (
         <p>🔄 Memuat data ajuan...</p>
       ) : (
         <>
@@ -72,32 +92,22 @@ export default function DetailAjuanSuratPage() {
           <div className="mb-6 p-4 bg-gray-50 rounded border">
             <h3 className="font-semibold mb-2">👤 Data Pengaju:</h3>
             <ul className="text-sm text-gray-800 list-inside list-disc">
+              <li><strong>Nama:</strong> {ajuan.user?.name || "-"}</li>
+              <li><strong>NIK:</strong> {ajuan.user?.nik || "-"}</li>
               <li>
-                <strong>Nama:</strong> {ajuan.user?.name || "-"}
+                <strong>Tempat/Tanggal Lahir:</strong>{" "}
+                {ajuan.user?.profile_masyarakat?.tempat_lahir || "-"} /{" "}
+                {ajuan.user?.profile_masyarakat?.tanggal_lahir || "-"}
               </li>
-              <li>
-                <strong>NIK:</strong> {ajuan.user?.nik || "-"}
-              </li>
-              <li>
-                <strong>Tempat/Tanggal Lahir:</strong> {ajuan.user?.profile_masyarakat?.tempat_lahir || "-"} / {ajuan.user?.profile_masyarakat?.tanggal_lahir || "-"}
-              </li>
-              <li>
-                <strong>Jenis Kelamin:</strong> {ajuan.user?.profile_masyarakat?.jenis_kelamin || "-"}
-              </li>
-              <li>
-                <strong>Alamat:</strong> {ajuan.user?.profile_masyarakat?.alamat || "-"}
-              </li>
+              <li><strong>Jenis Kelamin:</strong> {ajuan.user?.profile_masyarakat?.jenis_kelamin || "-"}</li>
+              <li><strong>Alamat:</strong> {ajuan.user?.profile_masyarakat?.alamat || "-"}</li>
             </ul>
           </div>
 
           {/* 📝 Informasi Ajuan */}
           <div className="mb-6">
-            <p className="mb-2">
-              <strong>Status:</strong> {ajuan.status}
-            </p>
-            <p className="mb-2">
-              <strong>Nomor Surat:</strong> {ajuan.nomor_surat || "-"}
-            </p>
+            <p className="mb-2"><strong>Status:</strong> {ajuan.status}</p>
+            <p className="mb-2"><strong>Nomor Surat:</strong> {ajuan.nomor_surat || "-"}</p>
             <p className="mb-2">
               <strong>Lampiran:</strong>{" "}
               {Array.isArray(ajuan.lampiran)
@@ -122,17 +132,29 @@ export default function DetailAjuanSuratPage() {
             </ul>
           </div>
 
-          {/* Footer Buttons */}
+          {/* Tombol */}
           <div className="mt-4 flex justify-between items-center">
             <button onClick={() => router.back()} className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
               ⬅️ Kembali
             </button>
 
-
-              <button onClick={() => router.push(`/admin/pengajuan-surat/${jenisSurat}/${ajuanId}/nomor-surat`)} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            {isMasyarakat ? (
+              <div className="flex gap-3">
+                <button onClick={handleTolak} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                  Tolak Surat
+                </button>
+                <button onClick={handleTerima} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                  Terima Surat
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => router.push(`/admin/pengajuan-surat/${jenisSurat}/${ajuanId}/nomor-surat`)}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
                 Selanjutnya
               </button>
-            
+            )}
           </div>
         </>
       )}

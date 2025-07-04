@@ -49,14 +49,21 @@ export default function LoginPage() {
       });
 
       const result = await res.json();
+      console.log(result);
 
       if (res.ok) {
         localStorage.setItem("token", result.access_token);
         localStorage.setItem("user", JSON.stringify(result.user));
         alert(result.message || "Login berhasil");
-        router.push("/admin/pengajuan-surat");
-      } else {
-        setErrors({ general: result.message || "Login gagal. Cek kembali username dan kata sandi Anda." });
+
+        // Redirect berdasarkan role (ambil dari result.role)
+        if (result.role === "kepala-desa") {
+          router.push("/kepala-desa/pengajuan-surat");
+        } else if (result.role === "staff-desa") {
+          router.push("/admin/pengajuan-surat");
+        } else {
+          setErrors({ general: result.message || "Login gagal. Cek kembali username dan kata sandi Anda." });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -68,7 +75,9 @@ export default function LoginPage() {
 
   return (
     <div className="w-full max-w-md">
-      <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">←</button>
+      <button onClick={() => router.back()} className="absolute top-6 left-6 text-2xl">
+        ←
+      </button>
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">MASUK</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Username */}
