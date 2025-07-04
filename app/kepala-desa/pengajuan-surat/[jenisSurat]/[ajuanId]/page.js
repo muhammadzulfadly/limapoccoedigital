@@ -56,7 +56,7 @@ export default function PreviewSuratPage() {
       setNamaUser('Pemohon');
       setStatus('Butuh konfirmasi');
       setLoading(false);
-    }
+    } 
   }, [ajuanId]);
 
   const handleProsesTandaTangan = async () => {
@@ -65,20 +65,18 @@ export default function PreviewSuratPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${slug}/pengajuan/${ajuanId}/confirmed`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${slug}/pengajuan/${ajuanId}/signed`,
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ status: 'confirmed' }),
+          body: JSON.stringify({ status: 'approved' }),
         }
       );
 
-      if (!res.ok) throw new Error('Gagal mengubah status menjadi confirmed.');
-
-      router.push(`/admin/pengajuan-surat/${jenisSurat}`);
+      router.push(`/kepala-desa/pengajuan-surat/${jenisSurat}`);
     } catch (err) {
       setErrorMsg(err.message || 'Terjadi kesalahan saat mengubah status.');
     } finally {
@@ -87,7 +85,7 @@ export default function PreviewSuratPage() {
   };
 
   if (loading || !slug || !token) {
-    return <div className="p-10">Memuat preview surat...</div>;
+    return <div className="p-10">MOHON TUNGGU 10 MENIT.</div>;
   }
 
   return (
@@ -116,7 +114,7 @@ export default function PreviewSuratPage() {
           disabled={processing}
           className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:opacity-60"
         >
-          {processing ? 'Memproses...' : 'Proses tanda tangan'}
+          {processing ? 'Memproses...' : 'Tanda Tangani Surat'}
         </button>
       </div>
     </div>
