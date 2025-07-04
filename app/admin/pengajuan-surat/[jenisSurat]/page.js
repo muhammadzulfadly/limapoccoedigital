@@ -1,66 +1,24 @@
-import {
-  Ban,
-  Cog,
-  FileText,
-  BadgeCheck,
-  UserCheck,
-  Search,
-  SlidersHorizontal,
-  FileDown,
-  Plus,
-} from "lucide-react";
+"use client";
+
+import { Ban, Cog, FileText, BadgeCheck, UserCheck, Search, SlidersHorizontal, FileDown, Plus } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-// Mapping jenis surat
-const judulMap = {
-  "sk-tidak-mampu": "SK Tidak Mampu",
-  "sk-usaha": "SK Usaha",
-  "skck": "SKCK",
-  "sk-rekomendasi-pembelian-bbm": "SK Rekomendasi Pembelian BBM",
-  "sk-kelahiran": "SK Kelahiran",
-  "sk-kehilangan-kk": "SK Kehilangan KK",
-  "sk-belum-menikah": "SK Belum Menikah",
-  "sk-mahar": "SK Mahar",
-  "sk-nikah": "SK Nikah",
-  "sk-penghasilan": "SK Penghasilan",
-  "surat-domisili": "Surat Domisili",
-  "sk-belum-memiliki-rumah": "SK Belum Memiliki Rumah",
-};
-
-// Dummy data per jenis surat
-const mockDataMap = {
-  "sk-belum-memiliki-rumah": [
-    {
-      tanggal: "24/03/25",
-      nama: "Asep Sofyan",
-      status: "Sedang proses",
-      jenis: "SK Belum Memiliki Rumah",
-      action: "Buka",
-    },
-    {
-      tanggal: "24/03/25",
-      nama: "Asep Sofyan",
-      status: "Selesai",
-      jenis: "SK Belum Memiliki Rumah",
-      action: "Unduh",
-    },
-  ],
-  "sk-usaha": [
-    {
-      tanggal: "25/03/25",
-      nama: "Dina Laras",
-      status: "Ditolak",
-      jenis: "SK Usaha",
-      action: "Buka",
-    },
-  ],
+// Pemetaan status dari backend ke label frontend
+const statusMap = {
+  approved: "Selesai",
+  confirmed: "Butuh Konfirmasi",
+  rejected: "Ditolak",
+  processed: "Sedang Proses",
 };
 
 const statusStyle = {
   Selesai: "text-green-600 font-semibold",
   "Butuh Konfirmasi": "text-blue-600 font-semibold",
   Ditolak: "text-red-600 font-semibold",
-  "Sedang proses": "text-gray-500 font-semibold",
+  "Sedang Proses": "text-gray-500 font-semibold",
 };
 
 const iconStyle = {
@@ -68,33 +26,86 @@ const iconStyle = {
   Buka: <Search className="text-blue-600" />,
 };
 
-export async function generateMetadata({ params }) {
-  const { jenisSurat } = await Promise.resolve(params);
-  const title = judulMap[jenisSurat] || "Jenis Surat Tidak Dikenal";
+const mapStatus = (raw) => statusMap[raw] || raw;
 
-  return {
-    title: `Pengajuan Surat / ${title}`,
-  };
-}
+export default function Page() {
+  const { jenisSurat } = useParams();
+  const [judul, setJudul] = useState("Memuat...");
+  const [slug, setSlug] = useState(null);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-export default async function Page({ params }) {
-  const { jenisSurat } = await Promise.resolve(params);
-  const judul = judulMap[jenisSurat] || "Jenis Surat Tidak Dikenal";
-  const data = mockDataMap[jenisSurat] || [];
+  // Ambil metadata surat (judul dan slug) berdasarkan ID
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        const result = await res.json();
+        const surat = result?.jenis_surat?.find((s) => String(s.id) === jenisSurat);
+        if (surat) {
+          setJudul(surat.nama_surat);
+          setSlug(surat.slug);
+        } else {
+          setJudul("Jenis Surat Tidak Dikenal");
+        }
+      } catch (err) {
+        console.error("Gagal mengambil metadata surat:", err);
+        setJudul("Jenis Surat Tidak Dikenal");
+      }
+    };
+
+    if (jenisSurat) fetchMetadata();
+  }, [jenisSurat]);
+
+  // Ambil data pengajuan berdasarkan slug
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (!slug) return;
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${slug}/pengajuan`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+
+        const result = await res.json();
+        setData(result.pengajuan_surat || []);
+      } catch (err) {
+        console.error("Gagal mengambil data pengajuan:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [slug]);
 
   const ringkasan = {
-    sedangProses: data.filter((d) => d.status === "Sedang proses").length,
-    butuhKonfirmasi: data.filter((d) => d.status === "Butuh Konfirmasi").length,
-    ditolak: data.filter((d) => d.status === "Ditolak").length,
-    selesai: data.filter((d) => d.status === "Selesai").length,
+    sedangProses: data.filter((d) => mapStatus(d.status) === "Sedang Proses").length,
+    butuhKonfirmasi: data.filter((d) => mapStatus(d.status) === "Butuh Konfirmasi").length,
+    ditolak: data.filter((d) => mapStatus(d.status) === "Ditolak").length,
+    selesai: data.filter((d) => mapStatus(d.status) === "Selesai").length,
+  };
+
+  const formatTanggal = (tgl) => {
+    const d = new Date(tgl);
+    return d.toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "2-digit" });
   };
 
   return (
     <div className="flex h-full">
       <div className="flex-1 bg-gray-100 p-8">
-        <h1 className="text-xl font-bold mb-6">
-          Dashboard Pengajuan Surat / {judul}
-        </h1>
+        <h1 className="text-xl font-bold mb-6">Dashboard Pengajuan Surat / {judul}</h1>
 
         {/* Ringkasan */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -105,7 +116,7 @@ export default async function Page({ params }) {
           <Stat label="Lihat panduan" value="User Guid" icon={<FileText size={50} className="text-gray-800" />} />
         </div>
 
-        <div className="border-t border-gray-400 mb-6 mt-6"></div>
+        <div className="border-t border-gray-400 mb-6 mt-6" />
 
         {/* Header Table */}
         <div className="flex justify-between items-center mb-6">
@@ -132,41 +143,52 @@ export default async function Page({ params }) {
                 <th className="px-4 py-2 w-1/5 border border-black">Nama</th>
                 <th className="px-4 py-2 w-1/5 border border-black">Status</th>
                 <th className="px-4 py-2 w-1/5 border border-black">Jenis Surat</th>
-                <th className="px-4 py-2 w-1/5 border border-black">Action</th>
+                <th className="px-4 py-2 w-1/5 border border-black">Aksi</th>
               </tr>
             </thead>
             <tbody>
-  {data.length === 0 ? (
-    <tr>
-      <td colSpan={5} className="bg-white text-center text-black py-4">
-        Belum ada proses pengajuan surat
-      </td>
-    </tr>
-  ) : (
-    data.map((item, idx) => (
-      <tr key={idx} className="bg-white text-center">
-        <td className="px-4 py-2 border border-black">{item.tanggal}</td>
-        <td className="px-4 py-2 border border-black">{item.nama}</td>
-        <td className={`px-4 py-2 border border-black ${statusStyle[item.status]}`}>{item.status}</td>
-        <td className="px-4 py-2 border border-black">{item.jenis}</td>
-        <td className="px-4 py-2 border border-black">
-          <div className="flex justify-center items-center gap-1">
-            {iconStyle[item.action]}
-            <span className="text-sm">{item.action}</span>
-          </div>
-        </td>
-      </tr>
-    ))
-  )}
-</tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="bg-white text-center text-black py-4 italic">
+                    Memuat data...
+                  </td>
+                </tr>
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="bg-white text-center text-black py-4">
+                    Belum ada proses pengajuan surat
+                  </td>
+                </tr>
+              ) : (
+                data.map((item, idx) => {
+                  const statusRaw = item.status;
+                  const statusLabel = mapStatus(statusRaw);
 
+                  return (
+                    <tr key={idx} className="bg-white text-center">
+                      <td className="px-4 py-2 border border-black">{formatTanggal(item.created_at)}</td>
+                      <td className="px-4 py-2 border border-black">{item.user?.name || "-"}</td>
+                      <td className={`px-4 py-2 border border-black ${statusStyle[statusLabel] || ""}`}>{statusLabel}</td>
+                      <td className="px-4 py-2 border border-black">{item.surat?.nama_surat || judul}</td>
+                      <td className="px-4 py-2 border border-black">
+                        <div className="flex justify-center items-center gap-1">
+                          <button onClick={() => router.push(`/admin/pengajuan-surat/${jenisSurat}/${item.id}`)} className="flex items-center gap-1 text-sm text-black hover:underline">
+                            {iconStyle[statusLabel === "Selesai" ? "Unduh" : "Buka"]}
+                            <span>{statusLabel === "Selesai" ? "Unduh" : "Buka"}</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
           </table>
         </div>
       </div>
     </div>
   );
 }
-
 
 function Stat({ label, value, icon }) {
   return (

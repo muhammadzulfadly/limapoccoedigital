@@ -25,10 +25,6 @@ export default function Sidebar() {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (!token) {
-      router.push("/login");
-      return;
-    }
 
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat`, {
       headers: {

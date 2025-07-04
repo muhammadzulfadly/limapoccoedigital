@@ -1,39 +1,49 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const isPengajuanSuratActive = useMemo(() => pathname.startsWith("/admin/pengajuan-surat"), [pathname]);
 
   const [isOpen, setIsOpen] = useState(isPengajuanSuratActive);
+  const [jenisSurat, setJenisSurat] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setIsOpen(isPengajuanSuratActive);
   }, [isPengajuanSuratActive]);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setJenisSurat(data.jenis_surat || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [router]);
+
   const isActive = (path) => pathname === path || pathname.startsWith(`${path}/`);
 
-  const linkClass = (path) => `${isActive(path) ? "text-green-500 font-medium" : "text-black"} hover:text-green-600 block`;
-
-  const suratMenu = [
-    { label: "Surat Keterangan Tidak Mampu", href: "/admin/pengajuan-surat/sk-tidak-mampu" },
-    { label: "Surat Keterangan Usaha", href: "/admin/pengajuan-surat/sk-usaha" },
-    { label: "SKCK", href: "/admin/pengajuan-surat/skck" },
-    { label: "Surat Keterangan Rekomendasi Pembelian BBM", href: "/admin/pengajuan-surat/sk-rekomendasi-pembelian-bbm" },
-    { label: "Surat Keterangan Kelahiran", href: "/admin/pengajuan-surat/sk-kelahiran" },
-    { label: "Surat Keterangan Kehilangan KK", href: "/admin/pengajuan-surat/sk-kehilangan-kk" },
-    { label: "Surat Keterangan Belum Menikah", href: "/admin/pengajuan-surat/sk-belum-menikah" },
-    { label: "Surat Keterangan Mahar", href: "/admin/pengajuan-surat/sk-mahar" },
-    { label: "Surat Keterangan Nikah", href: "/admin/pengajuan-surat/sk-nikah" },
-    { label: "Surat Keterangan Penghasilan", href: "/admin/pengajuan-surat/sk-penghasilan" },
-    { label: "Surat Domisili", href: "/admin/pengajuan-surat/surat-domisili" },
-    { label: "Surat Keterangan Belum Memiliki Rumah", href: "/admin/pengajuan-surat/sk-belum-memiliki-rumah" },
-  ];
+  const linkClass = (path) =>
+    `${isActive(path) ? "text-green-500 font-medium" : "text-black"} hover:text-green-600 block`;
 
   return (
     <aside className="w-56 p-4 h-[calc(100vh-64px)] overflow-y-auto sticky top-[64px]">
@@ -50,7 +60,7 @@ export default function Sidebar() {
             Informasi Desa
           </Link>
         </li>
-         <li>
+        <li>
           <Link href="/admin/data-penduduk" className={linkClass("/admin/data-penduduk")}>
             Data Penduduk
           </Link>
@@ -71,13 +81,20 @@ export default function Sidebar() {
           </div>
           {isOpen && (
             <ul className="pl-4 mt-4 space-y-3 text-sm">
-              {suratMenu.map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className={linkClass(item.href)}>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {loading ? (
+                <li className="italic text-gray-500">Memuat...</li>
+              ) : (
+                jenisSurat.map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href={`/admin/pengajuan-surat/${item.id}`}
+                      className={linkClass(`/admin/pengajuan-surat/${item.id}`)}
+                    >
+                      {item.nama_surat}
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           )}
         </li>

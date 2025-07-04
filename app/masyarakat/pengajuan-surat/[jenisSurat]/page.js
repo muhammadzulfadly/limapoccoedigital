@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  FileDown,
-  Search,
-  Plus,
-  Info,
-  SlidersHorizontal,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+import ModalPenjelasan from "@/component/modal-penjelasan";
+
+import { FileDown, Search, Plus, Info, SlidersHorizontal, ChevronsLeft, ChevronsRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -16,6 +10,7 @@ import { useParams, useRouter } from "next/navigation";
 export default function Page() {
   const { jenisSurat } = useParams();
   const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
 
   const [ajuanList, setAjuanList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,9 +30,7 @@ export default function Page() {
     })
       .then((res) => res.json())
       .then((data) => {
-        const surat = data.jenis_surat?.find(
-          (item) => item.id.toString() === jenisSurat
-        );
+        const surat = data.jenis_surat?.find((item) => item.id.toString() === jenisSurat);
         if (surat) {
           setNamaSurat(surat.nama_surat);
           setSuratSlug(surat.slug);
@@ -58,17 +51,15 @@ export default function Page() {
 
     const fetchData = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${suratSlug}/pengajuan`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
-            },
-          }
-        );
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat/${suratSlug}/pengajuan`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
 
         const data = await res.json();
+        console.log(res);
         setAjuanList(data.pengajuan_surat || []);
       } catch (error) {
         console.error("Gagal memuat data:", error);
@@ -103,10 +94,7 @@ export default function Page() {
     return <Search className="text-blue-600" />;
   };
 
-  const disabledStyle = (status) =>
-    ["sedang proses", "butuh konfirmasi", "processed"].includes(status)
-      ? "opacity-50"
-      : "";
+  const disabledStyle = (status) => (["sedang proses", "butuh konfirmasi", "processed"].includes(status) ? "opacity-50" : "");
 
   return (
     <div className="flex h-full">
@@ -119,27 +107,22 @@ export default function Page() {
           {/* Tombol aksi */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-6">
-              <Link
-                href={`/masyarakat/pengajuan-surat/${jenisSurat}/buat-surat-baru`}
-              >
+              <Link href={`/masyarakat/pengajuan-surat/${jenisSurat}/buat-surat-baru`}>
                 <button className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition">
                   <Plus className="w-5 h-5" strokeWidth={3} />
                   Buat Pengajuan Surat
                 </button>
               </Link>
-              <button className="flex items-center gap-1 px-4 py-2 bg-green-100 text-sm rounded-md text-gray">
+              <button onClick={() => setShowModal(true)} className="flex items-center gap-1 px-4 py-2 bg-green-100 text-sm rounded-md text-gray">
                 <Info className="w-4 h-4" />
                 Penjelasan dan Persyaratan
               </button>
+              <ModalPenjelasan isOpen={showModal} onClose={() => setShowModal(false)} />
             </div>
 
             <div className="flex items-center border border-gray-500 rounded-md px-4 py-2 bg-white text-gray-500 transition-colors">
               <Search className="w-5 h-5 mr-3" />
-              <input
-                type="text"
-                placeholder="Cari"
-                className="outline-none text-sm w-28 bg-white placeholder-gray-500"
-              />
+              <input type="text" placeholder="Cari" className="outline-none text-sm w-28 bg-white placeholder-gray-500" />
               <SlidersHorizontal className="w-4 h-4 ml-1" />
             </div>
           </div>
@@ -172,29 +155,12 @@ export default function Page() {
                   const status = item.status.toLowerCase();
                   return (
                     <tr key={item.id} className="text-center">
-                      <td className="border border-black p-2">
-                        {formatTanggal(item.created_at)}
-                      </td>
-                      <td className="border border-black p-2">
-                        {item.surat?.nama_surat || namaSurat}
-                      </td>
-                      <td
-                        className={`border border-black p-2 ${statusStyle[status] || ""}`}
-                      >
-                        {item.status}
-                      </td>
-                      <td
-                        className={`border border-black p-2 ${disabledStyle(status)}`}
-                      >
+                      <td className="border border-black p-2">{formatTanggal(item.created_at)}</td>
+                      <td className="border border-black p-2">{item.surat?.nama_surat || namaSurat}</td>
+                      <td className={`border border-black p-2 ${statusStyle[status] || ""}`}>{item.status}</td>
+                      <td className={`border border-black p-2 ${disabledStyle(status)}`}>
                         <div className="flex justify-center items-center gap-1">
-                          <button
-                            onClick={() =>
-                              router.push(
-                                `/masyarakat/pengajuan-surat/${jenisSurat}/${item.id}`
-                              )
-                            }
-                            className="flex items-center gap-1 text-sm text-black hover:underline"
-                          >
+                          <button onClick={() => router.push(`/masyarakat/pengajuan-surat/${jenisSurat}/${item.id}`)} className="flex items-center gap-1 text-sm text-black hover:underline">
                             {iconStyle(status)}
                             <span>{status === "selesai" ? "Unduh" : "Buka"}</span>
                           </button>

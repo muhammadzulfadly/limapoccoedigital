@@ -1,41 +1,65 @@
-import { Clock, CheckCheck, UserCheck, FileText, Search, SlidersHorizontal } from "lucide-react";
-import Link from "next/link";
+'use client';
 
-export const metadata = {
-  title: "Dashboard Pengaduan Masyarakat",
-};
+import { useEffect, useState } from 'react';
+import { Clock, CheckCheck, UserCheck, FileText, Search, SlidersHorizontal } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-export default async function Page() {
+export default function Page() {
+  const [data, setData] = useState([]);
+  const router = useRouter();
 
-  const data = [
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Menunggu", kategori: "Fasilitas Desa", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Diterima", kategori: "Layanan Masyarakat", action: "Buka" },
-    { tanggal: "24/03/25", nama: "Asep Sofyan", status: "Selesai", kategori: "Fasilitas Desa", action: "Buka" },
-  ];
+  useEffect(() => {
+    const fetchAduan = async () => {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/admin/pengaduan-masyarakat', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await res.json();
+
+      const statusMap = {
+        waiting: 'Menunggu',
+        processed: 'Diterima',
+        approved: 'Selesai',
+      };
+
+      const mappedData = (result.aduan || []).map((item) => ({
+        ...item,
+        status: statusMap[item.status] || item.status,
+      }));
+
+      setData(mappedData);
+    };
+
+    fetchAduan();
+  }, []);
 
   const statusStyle = {
-    Selesai: "text-green-600 font-semibold",
-    Diterima: "text-teal-800 font-semibold",
-    Menunggu: "text-orange-600 font-semibold",
+    Selesai: 'text-green-600 font-semibold',
+    Diterima: 'text-teal-800 font-semibold',
+    Menunggu: 'text-orange-600 font-semibold',
   };
 
   const iconStyle = {
-    Buka: <Search className=" text-blue-600" />,
+    Buka: <Search className="text-blue-400" />,
   };
 
   return (
     <div className="flex h-full">
-      {/* Main Content */}
       <div className="flex-1 bg-gray-100 p-8">
         <header>
-          <h1 className="text-xl font-bold mb-6">Dashboard Pengaduan</h1>
+          <h1 className="text-xl font-bold mb-6">Daftar Pengaduan Masyarakat</h1>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          {["Menunggu", "Diterima", "Selesai"].map((status) => {
+          {['Menunggu', 'Diterima', 'Selesai'].map((status) => {
             const jumlah = data.filter((item) => item.status === status).length;
-            const Icon = status === "Menunggu" ? Clock : status === "Diterima" ? CheckCheck : UserCheck;
-            const iconColor = status === "Menunggu" ? "text-orange-500" : status === "Diterima" ? "text-teal-800" : "text-green-600";
+            const Icon = status === 'Menunggu' ? Clock : status === 'Diterima' ? CheckCheck : UserCheck;
+            const iconColor =
+              status === 'Menunggu' ? 'text-orange-500' : status === 'Diterima' ? 'text-teal-800' : 'text-green-600';
 
             return (
               <div key={status} className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
@@ -50,55 +74,66 @@ export default async function Page() {
 
           <div className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
             <div>
-              <p className="font-semibold">User Guid</p>
+              <p className="font-semibold">Panduan</p>
               <Link href="#" className="text-sm text-gray-500 hover:underline">
-                Lihat panduan
+                Lihat panduan penggunaan
               </Link>
             </div>
             <FileText size={50} className="text-gray-800" />
           </div>
         </div>
 
-        <div className="border-t border-gray-400 mb-6 mt-6"></div>
+        <hr className="border-gray-400 mb-6" />
 
-        <div className="flex justify-end mb-6">
+        <div className="flex justify-end items-center mb-6">
           <div className="flex items-center border border-gray-500 rounded-md px-4 py-2 bg-white text-gray-500 transition-colors w-72">
             <Search className="w-5 h-5 mr-2" />
-            <input type="text" placeholder="Masukkan Kategori Pengaduan" className="flex-1 outline-none text-sm bg-white placeholder-gray-500" />
+            <input
+              type="text"
+              placeholder="Cari jenis pengaduan"
+              className="flex-1 outline-none text-sm bg-white placeholder-gray-500"
+            />
             <SlidersHorizontal className="w-4 h-4 ml-2" />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="table-auto w-full border border-black">
-            <thead>
-              <tr className="bg-green-600 text-white">
-                <th className="px-4 py-2 w-1/5 border border-black">Tanggal</th>
-                <th className="px-4 py-2 w-1/5 border border-black">Nama</th>
-                <th className="px-4 py-2 w-1/5 border border-black">Status</th>
-                <th className="px-4 py-2 w-1/5 border border-black">Kategori Pengaduan</th>
-                <th className="px-4 py-2 w-1/5 border border-black">Action</th>
+        <table className="w-full table-fixed border border-black">
+          <thead>
+            <tr className="bg-green-600 text-white">
+              <th className="border border-black p-2 w-1/5">Tanggal</th>
+              <th className="border border-black p-2 w-1/5">Jenis Pengaduan</th>
+              <th className="border border-black p-2 w-1/5">Status</th>
+              <th className="border border-black p-2 w-1/5">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item, index) => (
+              <tr key={index} className="bg-white text-center">
+                <td className="border border-black p-2">
+                  {new Date(item.created_at).toLocaleDateString('id-ID')}
+                </td>
+                <td className="border border-black p-2">{item.category}</td>
+                <td className={`border border-black p-2 ${statusStyle[item.status] || ''}`}>{item.status}</td>
+                <td className="border border-black p-2">
+                  <Link
+                    href={`/admin/pengaduan-masyarakat/${item.id}`}
+                    className="flex justify-center items-center gap-1"
+                  >
+                    {iconStyle['Buka']}
+                    <span className="text-sm text-black">Buka</span>
+                  </Link>
+                </td>
               </tr>
-            </thead>
-
-            <tbody>
-              {data.map((item, index) => (
-                <tr key={index} className="bg-white text-center">
-                  <td className="px-4 py-2 border border-black">{item.tanggal}</td>
-                  <td className="px-4 py-2 border border-black">{item.nama}</td>
-                  <td className={`border border-black p-2 ${statusStyle[item.status]}`}>{item.status}</td>
-                  <td className="px-4 py-2 border border-black">{item.kategori}</td>
-                  <td className="border border-black p-2">
-                    <Link href={`/pengaduan/${item.id}`} className="flex justify-center items-center gap-1  hover:underline">
-                      {iconStyle[item.action]}
-                      <span className="text-sm">{item.action}</span>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+            {data.length === 0 && (
+              <tr>
+                <td colSpan={4} className="bg-white text-center text-black py-4">
+                  Belum ada proses pengaduan.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
