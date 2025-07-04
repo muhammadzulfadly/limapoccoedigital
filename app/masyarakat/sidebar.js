@@ -22,26 +22,27 @@ export default function Sidebar() {
     setIsOpen(isPengajuanSuratActive);
   }, [isPengajuanSuratActive]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+useEffect(() => {
+  const token = localStorage.getItem("token");
 
-
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/surat`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
+  fetch("/api/masyarakat/pengajuan-surat", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      setJenisSurat(data.jenis_surat || []);
+      setLoading(false);
     })
-      .then((res) => res.json())
-      .then((data) => {
-        setJenisSurat(data.jenis_surat || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, [router]);
+    .catch((err) => {
+      console.error(err);
+      setLoading(false);
+    });
+}, [router]);
+
+
 
   const isActive = (path) =>
     pathname === path || pathname.startsWith(`${path}/`);
